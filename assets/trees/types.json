@@ -1,0 +1,984 @@
+{
+  "objectIdFieldName": "ObjectId",
+  "uniqueIdField": {
+    "name": "ObjectId",
+    "isSystemMaintained": true
+  },
+  "globalIdFieldName": "",
+  "geometryType": "esriGeometryPoint",
+  "spatialReference": {
+    "wkid": 102100,
+    "latestWkid": 3857
+  },
+  "fields": [
+    {
+      "name": "total",
+      "type": "esriFieldTypeDouble",
+      "alias": "total",
+      "sqlType": "sqlTypeFloat",
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "spc_common",
+      "type": "esriFieldTypeString",
+      "alias": "spc_common",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 4000,
+      "domain": null,
+      "defaultValue": null
+    },
+    {
+      "name": "spc_latin",
+      "type": "esriFieldTypeString",
+      "alias": "spc_latin",
+      "sqlType": "sqlTypeNVarchar",
+      "length": 4000,
+      "domain": null,
+      "defaultValue": null
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "total": 87014,
+        "spc_common": "London planetree",
+        "spc_latin": "Platanus x acerifolia",
+        "image": "london_planetree.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 64264,
+        "spc_common": "honeylocust",
+        "spc_latin": "Gleditsia triacanthos var. inermis",
+        "image": "honey_locust.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 58931,
+        "spc_common": "Callery pear",
+        "spc_latin": "Pyrus calleryana",
+        "image": "callery_pear.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 53185,
+        "spc_common": "pin oak",
+        "spc_latin": "Quercus palustris",
+        "image": "quercus_palustris.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 34189,
+        "spc_common": "Norway maple",
+        "spc_latin": "Acer platanoides",
+        "image": "norway_maple.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 29742,
+        "spc_common": "littleleaf linden",
+        "spc_latin": "Tilia cordata",
+        "image": "tilia_cordata.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 29279,
+        "spc_common": "cherry",
+        "spc_latin": "Prunus",
+        "image": "cherry_tree.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 29258,
+        "spc_common": "Japanese zelkova",
+        "spc_latin": "Zelkova serrata",
+        "image": "japanese_zelkova.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 21024,
+        "spc_common": "ginkgo",
+        "spc_latin": "Ginkgo biloba",
+        "image": "ginkgo_biloba.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 19338,
+        "spc_common": "Sophora",
+        "spc_latin": "Styphnolobium japonicum",
+        "image": "sophora.jpg"
+      }
+    },
+    {
+      "attributes": {
+        "total": 17246,
+        "spc_common": "red maple",
+        "spc_latin": "Acer rubrum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 16251,
+        "spc_common": "green ash",
+        "spc_latin": "Fraxinus pennsylvanica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 13530,
+        "spc_common": "American linden",
+        "spc_latin": "Tilia americana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 12277,
+        "spc_common": "silver maple",
+        "spc_latin": "Acer saccharinum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 10657,
+        "spc_common": "sweetgum",
+        "spc_latin": "Liquidambar styraciflua"
+      }
+    },
+    {
+      "attributes": {
+        "total": 8400,
+        "spc_common": "northern red oak",
+        "spc_latin": "Quercus rubra"
+      }
+    },
+    {
+      "attributes": {
+        "total": 7995,
+        "spc_common": "silver linden",
+        "spc_latin": "Tilia tomentosa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 7975,
+        "spc_common": "American elm",
+        "spc_latin": "Ulmus americana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 7080,
+        "spc_common": "maple",
+        "spc_latin": "Acer"
+      }
+    },
+    {
+      "attributes": {
+        "total": 6879,
+        "spc_common": "purple-leaf plum",
+        "spc_latin": "Prunus cerasifera"
+      }
+    },
+    {
+      "attributes": {
+        "total": 6598,
+        "spc_common": "swamp white oak",
+        "spc_latin": "Quercus bicolor"
+      }
+    },
+    {
+      "attributes": {
+        "total": 5923,
+        "spc_common": "crimson king maple",
+        "spc_latin": "Acer platanoides 'Crimson King'"
+      }
+    },
+    {
+      "attributes": {
+        "total": 5345,
+        "spc_common": "Chinese elm",
+        "spc_latin": "Ulmus parvifolia"
+      }
+    },
+    {
+      "attributes": {
+        "total": 4888,
+        "spc_common": "'Schubert' chokecherry",
+        "spc_latin": "Prunus virginiana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 4568,
+        "spc_common": "Japanese tree lilac",
+        "spc_latin": "Syringa reticulata"
+      }
+    },
+    {
+      "attributes": {
+        "total": 3801,
+        "spc_common": "eastern redbud",
+        "spc_latin": "Cercis canadensis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 3719,
+        "spc_common": "golden raintree",
+        "spc_latin": "Koelreuteria paniculata"
+      }
+    },
+    {
+      "attributes": {
+        "total": 3527,
+        "spc_common": "crab apple",
+        "spc_latin": "Malus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 3364,
+        "spc_common": "Kentucky coffeetree",
+        "spc_latin": "Gymnocladus dioicus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 3184,
+        "spc_common": "willow oak",
+        "spc_latin": "Quercus phellos"
+      }
+    },
+    {
+      "attributes": {
+        "total": 3020,
+        "spc_common": "dawn redwood",
+        "spc_latin": "Metasequoia glyptostroboides"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2988,
+        "spc_common": "hawthorn",
+        "spc_latin": "Crataegus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2844,
+        "spc_common": "sugar maple",
+        "spc_latin": "Acer saccharum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2731,
+        "spc_common": "sycamore maple",
+        "spc_latin": "Acer pseudoplatanus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2609,
+        "spc_common": "ash",
+        "spc_latin": "Fraxinus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2550,
+        "spc_common": "hedge maple",
+        "spc_latin": "Acer campestre"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2382,
+        "spc_common": "common hackberry",
+        "spc_latin": "Celtis occidentalis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2244,
+        "spc_common": "sawtooth oak",
+        "spc_latin": "Quercus acutissima"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2197,
+        "spc_common": "Amur maackia",
+        "spc_latin": "Maackia amurensis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2099,
+        "spc_common": "European hornbeam",
+        "spc_latin": "Carpinus betulus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2049,
+        "spc_common": "Amur maple",
+        "spc_latin": "Acer ginnala"
+      }
+    },
+    {
+      "attributes": {
+        "total": 2032,
+        "spc_common": "serviceberry",
+        "spc_latin": "Amelanchier"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1784,
+        "spc_common": "black locust",
+        "spc_latin": "Robinia pseudoacacia"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1686,
+        "spc_common": "white oak",
+        "spc_latin": "Quercus alba"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1644,
+        "spc_common": "English oak",
+        "spc_latin": "Quercus robur"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1595,
+        "spc_common": "Siberian elm",
+        "spc_latin": "Ulmus pumila"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1552,
+        "spc_common": "flowering dogwood",
+        "spc_latin": "Cornus florida"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1517,
+        "spc_common": "American hornbeam",
+        "spc_latin": "Carpinus caroliniana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1487,
+        "spc_common": "Schumard's oak",
+        "spc_latin": "Quercus shumardii"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1465,
+        "spc_common": "scarlet oak",
+        "spc_latin": "Quercus coccinea"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1327,
+        "spc_common": "black oak",
+        "spc_latin": "Quercus velutina"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1261,
+        "spc_common": "bald cypress",
+        "spc_latin": "Taxodium distichum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1157,
+        "spc_common": "mulberry",
+        "spc_latin": "Morus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1130,
+        "spc_common": "Japanese maple",
+        "spc_latin": "Acer palmatum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1121,
+        "spc_common": "white ash",
+        "spc_latin": "Fraxinus americana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1101,
+        "spc_common": "eastern redcedar",
+        "spc_latin": "Juniperus virginiana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1096,
+        "spc_common": "horse chestnut",
+        "spc_latin": "Aesculus hippocastanum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1081,
+        "spc_common": "American hophornbeam",
+        "spc_latin": "Ostrya virginiana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1076,
+        "spc_common": "tulip-poplar",
+        "spc_latin": "Liriodendron tulipifera"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1066,
+        "spc_common": "Cornelian cherry",
+        "spc_latin": "Cornus mas"
+      }
+    },
+    {
+      "attributes": {
+        "total": 1049,
+        "spc_common": "shingle oak",
+        "spc_latin": "Quercus imbricaria"
+      }
+    },
+    {
+      "attributes": {
+        "total": 915,
+        "spc_common": "hardy rubber tree",
+        "spc_latin": "Eucommia ulmoides"
+      }
+    },
+    {
+      "attributes": {
+        "total": 911,
+        "spc_common": "katsura tree",
+        "spc_latin": "Cercidiphyllum japonicum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 756,
+        "spc_common": "tree of heaven",
+        "spc_latin": "Ailanthus altissima"
+      }
+    },
+    {
+      "attributes": {
+        "total": 699,
+        "spc_common": "magnolia",
+        "spc_latin": "Magnolia"
+      }
+    },
+    {
+      "attributes": {
+        "total": 607,
+        "spc_common": "black cherry",
+        "spc_latin": "Prunus serotina"
+      }
+    },
+    {
+      "attributes": {
+        "total": 565,
+        "spc_common": "river birch",
+        "spc_latin": "Betula nigra"
+      }
+    },
+    {
+      "attributes": {
+        "total": 551,
+        "spc_common": "catalpa",
+        "spc_latin": "Catalpa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 535,
+        "spc_common": "paper birch",
+        "spc_latin": "Betula papyrifera"
+      }
+    },
+    {
+      "attributes": {
+        "total": 515,
+        "spc_common": "bur oak",
+        "spc_latin": "Quercus macrocarpa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 479,
+        "spc_common": "Kentucky yellowwood",
+        "spc_latin": "Cladrastis kentukea"
+      }
+    },
+    {
+      "attributes": {
+        "total": 462,
+        "spc_common": "Chinese tree lilac",
+        "spc_latin": "Syringa pekinensis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 442,
+        "spc_common": "crepe myrtle",
+        "spc_latin": "Lagerstroemia"
+      }
+    },
+    {
+      "attributes": {
+        "total": 426,
+        "spc_common": "Japanese hornbeam",
+        "spc_latin": "Carpinus japonica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 392,
+        "spc_common": "Japanese snowbell",
+        "spc_latin": "Styrax japonicus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 355,
+        "spc_common": "Atlantic white cedar",
+        "spc_latin": "Chamaecyparis thyoides"
+      }
+    },
+    {
+      "attributes": {
+        "total": 355,
+        "spc_common": "Norway spruce",
+        "spc_latin": "Picea abies"
+      }
+    },
+    {
+      "attributes": {
+        "total": 341,
+        "spc_common": "cockspur hawthorn",
+        "spc_latin": "Crataegus crusgalli var. inermis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 328,
+        "spc_common": "arborvitae",
+        "spc_latin": "Thuja occidentalis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 317,
+        "spc_common": "Turkish hazelnut",
+        "spc_latin": "Corylus colurna"
+      }
+    },
+    {
+      "attributes": {
+        "total": 302,
+        "spc_common": "kousa dogwood",
+        "spc_latin": "Cornus kousa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 300,
+        "spc_common": "silver birch",
+        "spc_latin": "Betula pendula"
+      }
+    },
+    {
+      "attributes": {
+        "total": 295,
+        "spc_common": "black walnut",
+        "spc_latin": "Juglans nigra"
+      }
+    },
+    {
+      "attributes": {
+        "total": 289,
+        "spc_common": "pine",
+        "spc_latin": "Pinus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 288,
+        "spc_common": "blackgum",
+        "spc_latin": "Nyssa sylvatica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 282,
+        "spc_common": "weeping willow",
+        "spc_latin": "Salix babylonica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 280,
+        "spc_common": "pagoda dogwood",
+        "spc_latin": "Cornus alternifolia"
+      }
+    },
+    {
+      "attributes": {
+        "total": 277,
+        "spc_common": "Persian ironwood",
+        "spc_latin": "Parrotia persica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 276,
+        "spc_common": "eastern cottonwood",
+        "spc_latin": "Populus deltoides"
+      }
+    },
+    {
+      "attributes": {
+        "total": 273,
+        "spc_common": "American beech",
+        "spc_latin": "Fagus grandifolia"
+      }
+    },
+    {
+      "attributes": {
+        "total": 245,
+        "spc_common": "empress tree",
+        "spc_latin": "Paulownia tomentosa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 234,
+        "spc_common": "Chinese fringetree",
+        "spc_latin": "Chionanthus retusus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 221,
+        "spc_common": "two-winged silverbell",
+        "spc_latin": "Halesia diptera"
+      }
+    },
+    {
+      "attributes": {
+        "total": 220,
+        "spc_common": "paperbark maple",
+        "spc_latin": "Acer griseum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 219,
+        "spc_common": "Oklahoma redbud",
+        "spc_latin": "Cercis reniformis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 202,
+        "spc_common": "spruce",
+        "spc_latin": "Picea"
+      }
+    },
+    {
+      "attributes": {
+        "total": 202,
+        "spc_common": "white pine",
+        "spc_latin": "Pinus strobus"
+      }
+    },
+    {
+      "attributes": {
+        "total": 183,
+        "spc_common": "Amur cork tree",
+        "spc_latin": "Phellodendron amurense"
+      }
+    },
+    {
+      "attributes": {
+        "total": 181,
+        "spc_common": "pond cypress",
+        "spc_latin": "Taxodium ascendens"
+      }
+    },
+    {
+      "attributes": {
+        "total": 173,
+        "spc_common": "Chinese chestnut",
+        "spc_latin": "Castanea mollissima"
+      }
+    },
+    {
+      "attributes": {
+        "total": 171,
+        "spc_common": "sassafras",
+        "spc_latin": "Sassafras albidum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 169,
+        "spc_common": "cucumber magnolia",
+        "spc_latin": "Magnolia acuminata"
+      }
+    },
+    {
+      "attributes": {
+        "total": 163,
+        "spc_common": "mimosa",
+        "spc_latin": "Albizia julibrissin"
+      }
+    },
+    {
+      "attributes": {
+        "total": 153,
+        "spc_common": "tartar maple",
+        "spc_latin": "Acer tataricum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 138,
+        "spc_common": "holly",
+        "spc_latin": "Ilex"
+      }
+    },
+    {
+      "attributes": {
+        "total": 132,
+        "spc_common": "southern magnolia",
+        "spc_latin": "Magnolia grandiflora"
+      }
+    },
+    {
+      "attributes": {
+        "total": 126,
+        "spc_common": "blue spruce",
+        "spc_latin": "Picea pungens"
+      }
+    },
+    {
+      "attributes": {
+        "total": 125,
+        "spc_common": "European beech",
+        "spc_latin": "Fagus sylvatica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 116,
+        "spc_common": "red horse chestnut",
+        "spc_latin": "Aesculus x carnea"
+      }
+    },
+    {
+      "attributes": {
+        "total": 114,
+        "spc_common": "black maple",
+        "spc_latin": "Acer nigrum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 110,
+        "spc_common": "trident maple",
+        "spc_latin": "Acer buergerianum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 108,
+        "spc_common": "false cypress",
+        "spc_latin": "Chamaecyparis pisifera"
+      }
+    },
+    {
+      "attributes": {
+        "total": 106,
+        "spc_common": "red pine",
+        "spc_latin": "Pinus resinosa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 99,
+        "spc_common": "pignut hickory",
+        "spc_latin": "Carya glabra"
+      }
+    },
+    {
+      "attributes": {
+        "total": 94,
+        "spc_common": "bigtooth aspen",
+        "spc_latin": "Populus grandidentata"
+      }
+    },
+    {
+      "attributes": {
+        "total": 88,
+        "spc_common": "eastern hemlock",
+        "spc_latin": "Tsuga canadensis"
+      }
+    },
+    {
+      "attributes": {
+        "total": 87,
+        "spc_common": "Atlas cedar",
+        "spc_latin": "Cedrus atlantica"
+      }
+    },
+    {
+      "attributes": {
+        "total": 85,
+        "spc_common": "Douglas-fir",
+        "spc_latin": "Pseudotsuga menziesii"
+      }
+    },
+    {
+      "attributes": {
+        "total": 83,
+        "spc_common": "quaking aspen",
+        "spc_latin": "Populus tremuloides"
+      }
+    },
+    {
+      "attributes": {
+        "total": 83,
+        "spc_common": "southern red oak",
+        "spc_latin": "Quercus falcata"
+      }
+    },
+    {
+      "attributes": {
+        "total": 75,
+        "spc_common": "Ohio buckeye",
+        "spc_latin": "Aesculus glabra"
+      }
+    },
+    {
+      "attributes": {
+        "total": 72,
+        "spc_common": "Himalayan cedar",
+        "spc_latin": "Cedrus deodara"
+      }
+    },
+    {
+      "attributes": {
+        "total": 64,
+        "spc_common": "boxelder",
+        "spc_latin": "Acer negundo"
+      }
+    },
+    {
+      "attributes": {
+        "total": 59,
+        "spc_common": "Shantung maple",
+        "spc_latin": "Acer truncatum"
+      }
+    },
+    {
+      "attributes": {
+        "total": 58,
+        "spc_common": "smoketree",
+        "spc_latin": "Cotinus coggygria"
+      }
+    },
+    {
+      "attributes": {
+        "total": 47,
+        "spc_common": "European alder",
+        "spc_latin": "Alnus glutinosa"
+      }
+    },
+    {
+      "attributes": {
+        "total": 46,
+        "spc_common": "American larch",
+        "spc_latin": "Larix laricina"
+      }
+    },
+    {
+      "attributes": {
+        "total": 37,
+        "spc_common": "black pine",
+        "spc_latin": "Pinus nigra"
+      }
+    },
+    {
+      "attributes": {
+        "total": 33,
+        "spc_common": "pitch pine",
+        "spc_latin": "Pinus rigida"
+      }
+    },
+    {
+      "attributes": {
+        "total": 29,
+        "spc_common": "Osage-orange",
+        "spc_latin": "Maclura pomifera"
+      }
+    },
+    {
+      "attributes": {
+        "total": 25,
+        "spc_common": "Scots pine",
+        "spc_latin": "Pinus sylvestris"
+      }
+    },
+    {
+      "attributes": {
+        "total": 10,
+        "spc_common": "Virginia pine",
+        "spc_latin": "Pinus virginiana"
+      }
+    },
+    {
+      "attributes": {
+        "total": 0,
+        "spc_common": null,
+        "spc_latin": null
+      }
+    }
+  ]
+}

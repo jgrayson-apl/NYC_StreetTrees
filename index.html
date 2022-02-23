@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0 maximum-scale=1.0"/>
+    <!-- META -->
+    <!--<meta property="og:title" content="">-->
+    <!--<meta property="og:description" content="">-->
+    <!--<meta property="og:image" content="https://geoxc-apps.bd.esri.com/assets/GeoXC.png">-->
+    <!--<meta property="og:url" content="https://geoxc-apps.bd.esri.com/.../index.html">-->
+    <!-- ICON -->
+    <link rel="icon" href="./assets/favicon.ico" sizes="32x32" type="image/vnd.microsoft.icon">
+    <!-- TITLE -->
+    <title class="application-title"></title>
+    
+    <!-- CHARTJS -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>-->
+    <!-- DOC: https://chartjs-plugin-datalabels.netlify.app/ -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>-->
+    <!--
+      https://unpkg.com/chart.js@3
+      https://unpkg.com/chartjs-chart-error-bars@3
+      https://unpkg.com/chartjs-gauge@0.3.0
+      https://github.com/sgratzl/chartjs-chart-error-bars
+      https://www.npmjs.com/package/chartjs-chart-error-bars
+    -->
+    
+    <!-- CALCITE -->
+    <!-- calcite-ui-icons: 3.18.2 (https://github.com/Esri/calcite-components/blob/v1.0.0-beta.69/package.json) -->
+    <script src="https://js.arcgis.com/calcite-components/1.0.0-beta.76/calcite.esm.js" type="module"></script>
+    <link href="https://js.arcgis.com/calcite-components/1.0.0-beta.76/calcite.css" rel="stylesheet"/>
+    
+    <!-- ArcGIS API for JavaScript-->
+    <link href="https://js.arcgis.com/4.23/@arcgis/core/assets/esri/themes/light/main.css" rel="stylesheet"/>
+    <script src="https://js.arcgis.com/4.23/"></script>
+    
+    <!-- APPLICATION -->
+    <link rel="stylesheet" type="text/css" href="./css/app-base.css"/>
+    <link rel="stylesheet" type="text/css" href="./css/application.css">
+    <script type="module" src="./js/Application.js"></script>
+  </head>
+  <body class="calcite-theme-light calcite-theme-app">
+    <calcite-shell dir="ltr">
+      
+      <!-- HEADER -->
+      <header class="content-row" slot="header">
+        <h2 class="application-title"></h2>
+        <div class="content-row">
+          <calcite-action-bar class="content-row" expand-disabled="true">
+            <calcite-action id="app-share-action" appearance="clear" scale="m" title="share current options..." text="share current options" icon="link" hidden></calcite-action>
+            <calcite-action id="app-details-action" appearance="clear" scale="m" title="app details..." text="app details" icon="information"></calcite-action>
+          </calcite-action-bar>
+          <calcite-alert id="app-share-alert" icon="" auto-dismiss="" auto-dismiss-duration="medium" scale="m" color="green" aria-hidden="true" role="alert">
+            <div slot="message">
+              Shareable link has been copied to the clipboard.
+            </div>
+            <calcite-link id="app-share-link" slot="link" href="#" target="_blank" role="link" title="open in new tab">
+              open in new tab
+            </calcite-link>
+          </calcite-alert>
+        </div>
+      </header>
+      
+      <!-- LEFT -->
+      <calcite-shell-panel slot="primary-panel" position="start" width-scale="s" collapsed="false">
+        <calcite-action-bar id="side-panel-action-bar" slot="action-bar">
+          <calcite-action text="Filter by Type" title="top tree types" icon="selected-items-filter" class="toggle-action" data-toggle="top-tree-list" active></calcite-action>
+        </calcite-action-bar>
+        <calcite-panel heading="Filter by Type" summary="Top 10 Species" class="toggle-panel" data-toggle="top-tree-list">
+          <div slot="header-actions-end">
+            <calcite-action icon="x" title="close panel" class="toggle-close" data-toggle="top-tree-list"></calcite-action>
+          </div>
+          <div class="margin-s">
+            <calcite-button id="clear-selection-btn" width="full" icon-end="reset" appearance="outline">clear type filter</calcite-button>
+          </div>
+          <div style="margin-left:1px;">
+            <calcite-tile-select-group id="tree-type-list" layout="vertical"></calcite-tile-select-group>
+          </div>
+        </calcite-panel>
+      </calcite-shell-panel>
+      
+      <!-- CENTER -->
+      <div id="center-container" class="content-col content-fill">
+        <div id="view-container">
+          <calcite-loader id="view-updating" type="indeterminate" scale="s"></calcite-loader>
+        </div>
+      </div>
+      
+      <!-- CENTER BOTTOM -->
+      <calcite-shell-center-row slot="center-row" position="start">
+        <calcite-panel id="bottom-container" heading="Filter by Diameter">
+          <calcite-action slot="header-actions-start" scale="s" icon="selection-filter"></calcite-action>
+          <calcite-button id="histogram-reset-btn" slot="header-actions-end" scale="s" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
+          <div id="histogram-container"></div>
+        </calcite-panel>
+      </calcite-shell-center-row>
+      
+      <!-- RIGHT -->
+      <calcite-shell-panel slot="contextual-panel" position="end" width-scale="m" collapsed="false">
+        <calcite-action-bar slot="action-bar">
+          <calcite-action text="Filter by Location" icon="extent-filter" class="toggle-action" data-toggle="filter" active></calcite-action>
+        </calcite-action-bar>
+        
+        <calcite-panel heading="Location Summary" class="toggle-panel" data-toggle="summary">
+          <div slot="header-actions-end">
+            <calcite-action icon="x" title="close panel" class="toggle-close" data-toggle="summary"></calcite-action>
+          </div>
+          
+          <calcite-label class="margin-l">
+            <div>Search Distance (miles)</div>
+            <calcite-slider id="search-distance-slider" label-handles label-ticks min="0.2" max="2.2" value="1.0" page-step="0.8" snap step="0.1" ticks="0.4"></calcite-slider>
+          </calcite-label>
+          
+          <calcite-tabs class="margin-s">
+            <calcite-tab-nav slot="tab-nav">
+              <calcite-tab-title active>Interactive</calcite-tab-title>
+              <calcite-tab-title>By Address</calcite-tab-title>
+              <calcite-tab-title>By Zip Code</calcite-tab-title>
+            </calcite-tab-nav>
+            <calcite-tab class="padding-m" active>
+              <calcite-button id="search-location-btn" icon-start="pin-plus" width="full" appearance="outline">set map location</calcite-button>
+            </calcite-tab>
+            <calcite-tab class="padding-m">
+              <calcite-label>
+                <div>Address</div>
+                <calcite-input>
+                  <calcite-button slot="action">Find</calcite-button>
+                </calcite-input>
+              </calcite-label>
+            </calcite-tab>
+            <calcite-tab class="padding-m">
+              <calcite-label>
+                <div>Zip Code</div>
+                <calcite-input>
+                  <calcite-button slot="action">Find</calcite-button>
+                </calcite-input>
+              </calcite-label>
+            </calcite-tab>
+          </calcite-tabs>
+          
+          <calcite-block heading="Summary Details" summary="within area of interest" open>
+          
+            <calcite-block-section text="Biggest Tree" open>
+              <calcite-label layout="inline">
+                <div>Type:</div>
+                <div id="summary-biggest-type-label"></div>
+              </calcite-label>
+              <calcite-label layout="inline">
+                <div>Address:</div>
+                <div id="summary-biggest-address-label"></div>
+              </calcite-label>
+            </calcite-block-section>
+            <calcite-block-section text="Most Common Type" open>
+              <calcite-label layout="inline">
+                <div>Type:</div>
+                <div id="summary-type-label"></div>
+              </calcite-label>
+            </calcite-block-section>
+            
+            <calcite-block-section text="Average Tree Size" open>
+              <calcite-label layout="inline">
+                <div id="summary-avg-size-label"></div>
+                <div>inches</div>
+              </calcite-label>
+            </calcite-block-section>
+            
+          </calcite-block>
+        
+        </calcite-panel>
+      </calcite-shell-panel>
+      
+      <!-- NOTICES ADN ALERTS -->
+      <calcite-notice id="app-notice" icon="" scale="m" width="auto" dismissible="" color="red">
+        <div slot="title"></div>
+        <div slot="message"></div>
+      </calcite-notice>
+    
+    </calcite-shell>
+    
+    <!-- LOADER -->
+    <calcite-loader id="app-loader" active="true" type="indeterminate" scale="l"></calcite-loader>
+    
+    <!-- APP DETAILS MODAL -->
+    <calcite-modal id="app-details-modal" color="blue" background-color="grey" scale="m" width="m" role="dialog" aria-labelledby="app-modal-title">
+      <h3 slot="header" id="app-modal-title" class="application-title"></h3>
+      <div slot="content" class="application-description"></div>
+      <div slot="secondary" class="margin-m">
+        <calcite-label layout="inline">
+          <span>hide on startup</span>
+          <calcite-checkbox id="hide-startup-checkbox"></calcite-checkbox>
+        </calcite-label>
+      </div>
+      <calcite-button id="app-details-ok-btn" slot="primary" width="full" hidden>OK</calcite-button>
+    </calcite-modal>
+    
+    <!-- TREE TYPE ITEM TEMPLATE -->
+    <template id="tree-type-template">
+      <calcite-tile-select
+        heading=""
+        description=""
+        value=""
+        name="tree-type-item"
+        input-enabled="true"
+        input-alignment="end"
+        type="radio"
+        width="full">
+        <img class="tree-thumbnail" height="100">
+      </calcite-tile-select>
+    </template>
+  
+  </body>
+</html>
