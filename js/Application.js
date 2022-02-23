@@ -61,10 +61,8 @@ class Application extends AppBase {
       if (view) {
         require([
           'esri/widgets/Home',
-          'esri/widgets/Search',
-          'esri/widgets/LayerList',
           'esri/widgets/Legend'
-        ], (Home, Search, LayerList, Legend) => {
+        ], (Home, Legend) => {
 
           //
           // CONFIGURE VIEW SPECIFIC STUFF HERE //
@@ -78,10 +76,10 @@ class Application extends AppBase {
           view.ui.add(home, {position: 'top-left', index: 0});
 
           // LEGEND //
-          /*
-           const legend = new Legend({ view: view });
-           view.ui.add(legend, {position: 'bottom-left', index: 0});
-           */
+
+          const legend = new Legend({view: view});
+          view.ui.add(legend, {position: 'bottom-left', index: 0});
+
 
           // SEARCH /
           /*
@@ -259,18 +257,34 @@ class Application extends AppBase {
             container: "histogram-container",
             rangeType: "between",
             includedBarColor: '#7bb07f',
-            excludedBarColor: '#cccccc',
+            excludedBarColor: '#e6f0e6',
             precision: 0,
-            labelInputsEnabled: false,
             min: min, max: max,
             values: [min, max],
+            labelFormatFunction: (value, type) => {
+              return value.toFixed(0);
+            },
             barCreatedFunction: (index, element) => {
-              //const bin = slider.bins[index];
               element.setAttribute("stroke-width", "0.8");
-              element.setAttribute("stroke", "#cccccc");
+              element.setAttribute("stroke", "#f8f8f8");
             }
           });
 
+          // UPDATE THE LAYER FILTER //
+          const updateFeatureEffect = promiseUtils.debounce(() => {
+
+            const filters = [slider.generateWhereClause(statField)];
+            treeSpeciesFilter && filters.push(treeSpeciesFilter);
+
+            treeTypeLayerView.featureEffect = {
+              filter: {
+                where: filters.join(' AND ')
+              },
+              excludedEffect: 'opacity(0.2) blur(5px)'
+            };
+          });
+
+          // DEFAULT HISTOGRAM PARAMETERS //
           const defaultHistogramParams = {
             layer: treeTypeLayer,
             field: statField,
@@ -279,7 +293,10 @@ class Application extends AppBase {
             maxValue: max
           };
 
+          // TREE SPECIES FILTER //
           let treeSpeciesFilter = null;
+
+          // UPDATE HISTOGRAM BINS //
           this.updateSliderBins = (treeSpecies) => {
             treeSpeciesFilter = treeSpecies ? `(spc_common = '${ treeSpecies }')` : null;
 
@@ -299,24 +316,12 @@ class Application extends AppBase {
           };
           this.updateSliderBins();
 
-          const updateFeatureEffect = promiseUtils.debounce(() => {
-
-            const filters = [slider.generateWhereClause(statField)];
-            treeSpeciesFilter && filters.push(treeSpeciesFilter);
-
-            treeTypeLayerView.featureEffect = {
-              filter: {
-                where: filters.join(' AND ')
-              },
-              excludedEffect: "grayscale(1.0) opacity(0.4)"
-            };
-          });
-
+          // UPDATE THE LAYER FILTER WHEN USER CHANGES RANGE //
           slider.on(["thumb-change", "thumb-drag", "segment-drag"], () => {
             updateFeatureEffect();
           });
 
-          // RESET MIN/MAX BUTTON //
+          // RESET MIN/MAX RANGE //
           const histogramResetBtn = document.getElementById('histogram-reset-btn');
           histogramResetBtn.addEventListener('click', () => {
             slider.set({
@@ -343,11 +348,12 @@ class Application extends AppBase {
    */
   initializeSummary({view, treeTypeLayer}) {
     require([
+      "esri/core/Handles",
       "esri/core/promiseUtils",
       "esri/Graphic",
       "esri/layers/GraphicsLayer",
       "esri/geometry/geometryEngine"
-    ], (promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
+    ], (Handles, promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
 
 
       const locationGraphic = new Graphic({
@@ -388,72 +394,130 @@ class Application extends AppBase {
         }
       });
 
-      const locationGraphicsLayer = new GraphicsLayer({
+      // ANALYSIS LAYER //
+      const analysisGraphicsLayer = new GraphicsLayer({
         title: 'Filter by Location',
         effect: 'drop-shadow(1px,1px,2px)',
         graphics: [searchGraphic, locationGraphic, biggestGraphic]
       });
-      view.map.add(locationGraphicsLayer);
-
+      view.map.add(analysisGraphicsLayer);
 
       view.whenLayerView(treeTypeLayer).then(treeTypeLayerView => {
 
-
+        // SUMMARY DETAILS LABELS //
+        const summaryBiggestTypeLabel = document.getElementById('summary-biggest-type-label');
+        const summaryBiggestAddressLabel = document.getElementById('summary-biggest-address-label');
+        const summaryCommonTypeLabel = document.getElementById('summary-common-type-label');
         const summaryAvgSizeLabel = document.getElementById('summary-avg-size-label');
 
+        // ABORT ERROR HANDLER //
+        const _abortHandler = error => { if (error.name !== "AbortError") { console.error(error); } }
 
+        // UPDATE SUMMARY DETAILS //
         const updateSummaryDetails = promiseUtils.debounce(() => {
 
-          const summaryQuery = treeTypeLayerView.createQuery();
-          summaryQuery.set({
-            geometry: searchGraphic.geometry,
-            where: '(1=1)',
-            outFields: ['spc_common'],
-            outStatistics: [
-              {"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "avgTreeSize"},
-              {"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "count"}
-            ]
-          });
-          return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
-            const stats = summaryFS.features[0].attributes;
+          if (searchGraphic.geometry) {
 
-            summaryAvgSizeLabel.innerHTML = stats.avgTreeSize.toLocaleString();
+            const summaryQuery = treeTypeLayerView.createQuery();
+            summaryQuery.set({
+              geometry: searchGraphic.geometry,
+              where: '(1=1)',
+              outFields: ['spc_common'],
+              outStatistics: [
+                {"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "avgTreeSize"},
+                {"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "count"}
+              ]
+            });
+            return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
+              const stats = summaryFS.features[0].attributes;
 
-          });
+              summaryBiggestTypeLabel.innerHTML = '';
+              summaryBiggestAddressLabel.innerHTML = '';
+              summaryCommonTypeLabel.innerHTML = '';
+
+              summaryAvgSizeLabel.innerHTML = stats.avgTreeSize.toLocaleString();
+
+            });
+
+          } else {
+
+            summaryBiggestTypeLabel.innerHTML = '';
+            summaryBiggestAddressLabel.innerHTML = '';
+            summaryCommonTypeLabel.innerHTML = '';
+            summaryAvgSizeLabel.innerHTML = '';
+
+            return Promise.resolve();
+          }
         });
 
 
+        // SEARCH DISTANCE SLIDER //
         const searchDistanceSlider = document.getElementById('search-distance-slider');
         searchDistanceSlider.addEventListener('calciteSliderInput', () => {
           if (locationGraphic.geometry) {
             searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
-            updateSummaryDetails();
+            updateSummaryDetails().catch(_abortHandler);
           }
         });
 
-        let clickHandler = null;
+        // EVENT HANDLES //
+        let eventHandles = new Handles();
+
+        // TOGGLE SEARCH LOCATION //
         const searchLocationBtn = document.getElementById('search-location-btn');
         searchLocationBtn.addEventListener('click', () => {
-          clickHandler && clickHandler.remove();
 
+          // IS ACTIVE //
           const active = searchLocationBtn.toggleAttribute('active');
           searchLocationBtn.setAttribute('appearance', active ? 'solid' : 'outline');
           view.container.style.cursor = active ? 'crosshair' : 'default';
 
-          if (active) {
+          // REMOVE ANY PREVIOUS EVENT HANDLES //
+          eventHandles.removeAll();
 
-            clickHandler = view.on('click', ({mapPoint}) => {
-              locationGraphic.geometry = mapPoint;
-              searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
-              updateSummaryDetails();
-            });
+          if (active) {
+            // ENABLE SEARCH AREA EVENTS //
+            enableSearchAreaEvents();
 
           } else {
             locationGraphic.geometry = null;
             searchGraphic.geometry = null;
-            updateSummaryDetails();
+            updateSummaryDetails().catch(_abortHandler);
           }
         });
+
+        // ENABLE SEARCH AREA EVENTS //
+        const enableSearchAreaEvents = () => {
+
+          // VIEW CLICK //
+          const clickHandler = view.on('click', ({mapPoint}) => {
+            locationGraphic.geometry = mapPoint;
+            searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
+            updateSummaryDetails().catch(_abortHandler);
+          });
+
+          // VIEW POINTER MOVE //
+          const moveHandle = view.on('pointer-move', moveEvt => {
+            view.hitTest(moveEvt, {include: [locationGraphic]}).then(({results}) => {
+              view.container.style.cursor = (results?.length) ? 'move' : 'default';
+            });
+          });
+
+          // VIEW DRAG //
+          const dragHandle = view.on('drag', dragEvt => {
+            dragEvt.stopPropagation();
+            switch (dragEvt.action) {
+              case 'update':
+                locationGraphic.geometry = view.toMap(dragEvt);
+                searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
+                updateSummaryDetails().catch(_abortHandler);
+                break;
+            }
+          });
+
+          // EVENT HANDLES //
+          eventHandles.add([clickHandler, moveHandle, dragHandle]);
+        }
 
       });
     });

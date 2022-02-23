@@ -53,7 +53,7 @@
         <calcite-action-bar id="side-panel-action-bar" slot="action-bar">
           <calcite-action text="Filter by Type" title="top tree types" icon="selected-items-filter" class="toggle-action" data-toggle="top-tree-list" active></calcite-action>
         </calcite-action-bar>
-        <calcite-panel heading="Filter by Type" summary="Top 10 Species" class="toggle-panel" data-toggle="top-tree-list">
+        <calcite-panel heading="Filter by Type" summary="top 10 species" class="toggle-panel" data-toggle="top-tree-list">
           <div slot="header-actions-end">
             <calcite-action icon="x" title="close panel" class="toggle-close" data-toggle="top-tree-list"></calcite-action>
           </div>
@@ -75,9 +75,13 @@
       
       <!-- CENTER BOTTOM -->
       <calcite-shell-center-row slot="center-row" position="start">
-        <calcite-panel id="bottom-container" heading="Filter by Diameter">
+        <calcite-panel id="bottom-container" heading="Filter by Diameter" summary="diameter in inches at breast height">
           <calcite-action slot="header-actions-start" scale="s" icon="selection-filter"></calcite-action>
-          <calcite-button id="histogram-reset-btn" slot="header-actions-end" scale="s" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
+          
+          <div slot="header-actions-end">
+            <calcite-button id="histogram-reset-btn"  scale="s" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
+          </div>
+          
           <div id="histogram-container"></div>
         </calcite-panel>
       </calcite-shell-center-row>
@@ -85,7 +89,7 @@
       <!-- RIGHT -->
       <calcite-shell-panel slot="contextual-panel" position="end" width-scale="m" collapsed="false">
         <calcite-action-bar slot="action-bar">
-          <calcite-action text="Filter by Location" icon="extent-filter" class="toggle-action" data-toggle="filter" active></calcite-action>
+          <calcite-action text="Filter by Location" icon="extent-filter" class="toggle-action" data-toggle="summary" active></calcite-action>
         </calcite-action-bar>
         
         <calcite-panel heading="Location Summary" class="toggle-panel" data-toggle="summary">
@@ -125,33 +129,41 @@
             </calcite-tab>
           </calcite-tabs>
           
-          <calcite-block heading="Summary Details" summary="within area of interest" open>
-          
+          <calcite-block heading="Summary Details" summary="within search area" open>
+            
             <calcite-block-section text="Biggest Tree" open>
-              <calcite-label class="details-label" layout="inline">
-                <div>Type:</div>
-                <div id="summary-biggest-type-label"></div>
-              </calcite-label>
-              <calcite-label class="details-label" layout="inline">
-                <div>Address:</div>
-                <div id="summary-biggest-address-label"></div>
-              </calcite-label>
+              <div class="details-label">
+                <calcite-label layout="inline">
+                  <div>Type:</div>
+                  <div id="summary-biggest-type-label"></div>
+                </calcite-label>
+              </div>
+              <div class="details-label">
+                <calcite-label layout="inline">
+                  <div>Address:</div>
+                  <div id="summary-biggest-address-label"></div>
+                </calcite-label>
+              </div>
             </calcite-block-section>
             
             <calcite-block-section text="Most Common Type" open>
-              <calcite-label class="details-label" layout="inline">
-                <div>Type:</div>
-                <div id="summary-type-label"></div>
-              </calcite-label>
+              <div class="details-label">
+                <calcite-label layout="inline">
+                  <div>Type:</div>
+                  <div id="summary-common-type-label"></div>
+                </calcite-label>
+              </div>
             </calcite-block-section>
             
             <calcite-block-section text="Average Tree Size" open>
-              <calcite-label class="details-label" layout="inline">
-                <div>Inches:</div>
-                <div id="summary-avg-size-label"></div>
-              </calcite-label>
+              <div class="details-label">
+                <calcite-label layout="inline">
+                  <div>Inches:</div>
+                  <div id="summary-avg-size-label"></div>
+                </calcite-label>
+              </div>
             </calcite-block-section>
-            
+          
           </calcite-block>
         
         </calcite-panel>
