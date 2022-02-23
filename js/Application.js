@@ -253,13 +253,13 @@ class Application extends AppBase {
 
           const statField = 'tree_dbh';
           const min = 0;
-          const max = 30;
+          const max = 50;
 
           const slider = new HistogramRangeSlider({
             container: "histogram-container",
             rangeType: "between",
-            includedBarColor: '#50ba5f',
-            excludedBarColor: '#cbe2cb',
+            includedBarColor: '#7bb07f',
+            excludedBarColor: '#cccccc',
             precision: 0,
             labelInputsEnabled: false,
             min: min, max: max,
@@ -267,7 +267,7 @@ class Application extends AppBase {
             barCreatedFunction: (index, element) => {
               //const bin = slider.bins[index];
               element.setAttribute("stroke-width", "0.8");
-              element.setAttribute("stroke", "#cbe2cb");
+              element.setAttribute("stroke", "#cccccc");
             }
           });
 
@@ -308,7 +308,7 @@ class Application extends AppBase {
               filter: {
                 where: filters.join(' AND ')
               },
-              excludedEffect: "opacity(0.0)"
+              excludedEffect: "grayscale(1.0) opacity(0.4)"
             };
           });
 
