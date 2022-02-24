@@ -12,6 +12,9 @@
     <link rel="icon" href="./assets/favicon.ico" sizes="32x32" type="image/vnd.microsoft.icon">
     <!-- TITLE -->
     <title class="application-title"></title>
+
+    <!-- CHARTJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- CALCITE -->
     <script src="https://js.arcgis.com/calcite-components/1.0.0-beta.76/calcite.esm.js" type="module"></script>
@@ -74,14 +77,12 @@
       </div>
       
       <!-- CENTER BOTTOM -->
-      <calcite-shell-center-row slot="center-row" position="start">
-        <calcite-panel id="bottom-container" heading="Filter by Diameter" summary="diameter in inches at breast height">
+      <calcite-shell-center-row slot="center-row" height-scale="m">
+        <calcite-panel id="bottom-container" heading="Filter by Diameter" summary='measured at approximately 54" above the ground'>
           <calcite-action slot="header-actions-start" scale="s" icon="selection-filter"></calcite-action>
-          
           <div slot="header-actions-end">
-            <calcite-button id="histogram-reset-btn"  scale="s" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
+            <calcite-button id="histogram-reset-btn" scale="s" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
           </div>
-          
           <div id="histogram-container"></div>
         </calcite-panel>
       </calcite-shell-center-row>
@@ -92,65 +93,82 @@
           <calcite-action text="Filter by Location" icon="extent-filter" class="toggle-action" data-toggle="summary" active></calcite-action>
         </calcite-action-bar>
         
-        <calcite-panel heading="Location Summary" class="toggle-panel" data-toggle="summary">
+        <calcite-panel heading="Location Summary" summary="details about neighborhood trees" class="toggle-panel" data-toggle="summary">
           <div slot="header-actions-end">
             <calcite-action icon="x" title="close panel" class="toggle-close" data-toggle="summary"></calcite-action>
           </div>
-          
-          <calcite-label class="margin-l">
-            <div>Search Distance (miles)</div>
-            <calcite-slider id="search-distance-slider" label-handles label-ticks min="0.2" max="2.2" value="1.0" page-step="0.8" snap step="0.1" ticks="0.4"></calcite-slider>
-          </calcite-label>
-          
-          <calcite-tabs class="margin-s">
+  
+          <calcite-tabs id="summary-tabs" class="margin-s">
             <calcite-tab-nav slot="tab-nav">
               <calcite-tab-title active>Interactive</calcite-tab-title>
               <calcite-tab-title>By Address</calcite-tab-title>
-              <calcite-tab-title>By Zip Code</calcite-tab-title>
+              <calcite-tab-title>By Borough</calcite-tab-title>
             </calcite-tab-nav>
             <calcite-tab class="padding-m" active>
-              <calcite-button id="search-location-btn" icon-start="pin-plus" width="full" appearance="outline">set map location</calcite-button>
+              <calcite-label>
+                <div>Location</div>
+                <calcite-button id="search-location-btn" icon-start="pin-plus" width="full" appearance="outline">set map location</calcite-button>
+              </calcite-label>
             </calcite-tab>
             <calcite-tab class="padding-m">
               <calcite-label>
                 <div>Address</div>
-                <calcite-input>
+                <calcite-input placeholder="nyc address" type="search" clearable>
                   <calcite-button slot="action">Find</calcite-button>
                 </calcite-input>
               </calcite-label>
             </calcite-tab>
             <calcite-tab class="padding-m">
               <calcite-label>
-                <div>Zip Code</div>
-                <calcite-input>
-                  <calcite-button slot="action">Find</calcite-button>
-                </calcite-input>
+                <div>Borough</div>
+                <calcite-radio-group id="borough-list" scale="s" width="full"></calcite-radio-group>
               </calcite-label>
             </calcite-tab>
           </calcite-tabs>
           
+          <calcite-label class="margin-l">
+            <div>Search Distance (miles)</div>
+            <calcite-slider id="search-distance-slider" label-handles label-ticks min="0.25" max="2.25" value="0.75" page-step="0.5" snap step="0.05" ticks="0.5"></calcite-slider>
+          </calcite-label>
+          
           <calcite-block heading="Summary Details" summary="within search area" open>
             
             <calcite-block-section text="Biggest Tree" open>
+              
+              <div class="details-label">
+                <calcite-label layout="inline">
+                  <div>Inches:</div>
+                  <div id="summary-biggest-size-label"></div>
+                </calcite-label>
+              </div>
+              
               <div class="details-label">
                 <calcite-label layout="inline">
                   <div>Type:</div>
                   <div id="summary-biggest-type-label"></div>
                 </calcite-label>
               </div>
+              
               <div class="details-label">
                 <calcite-label layout="inline">
                   <div>Address:</div>
                   <div id="summary-biggest-address-label"></div>
                 </calcite-label>
               </div>
+            
             </calcite-block-section>
             
-            <calcite-block-section text="Most Common Type" open>
+            <calcite-block-section text="Most Common Tree" open>
               <div class="details-label">
                 <calcite-label layout="inline">
-                  <div>Type:</div>
+                  <div>Species:</div>
                   <div id="summary-common-type-label"></div>
+                </calcite-label>
+              </div>
+              <div class="details-label">
+                <calcite-label layout="inline">
+                  <div>Count:</div>
+                  <div id="summary-common-count-label"></div>
                 </calcite-label>
               </div>
             </calcite-block-section>

@@ -59,16 +59,15 @@ class Application extends AppBase {
   configView(view) {
     return new Promise((resolve, reject) => {
       if (view) {
-        require([
-          'esri/widgets/Home',
-          'esri/widgets/Legend'
-        ], (Home, Legend) => {
+        require(['esri/widgets/Home', 'esri/widgets/Legend'], (Home, Legend) => {
 
           //
           // CONFIGURE VIEW SPECIFIC STUFF HERE //
           //
           view.set({
-            constraints: {snapToZoom: false}
+            constraints: {snapToZoom: false}, highlightOptions: {
+              color: 'orange', haloOpacity: 0.9, fillOpacity: 0.2
+            }
           });
 
           // HOME //
@@ -76,26 +75,8 @@ class Application extends AppBase {
           view.ui.add(home, {position: 'top-left', index: 0});
 
           // LEGEND //
-
           const legend = new Legend({view: view});
           view.ui.add(legend, {position: 'bottom-left', index: 0});
-
-
-          // SEARCH /
-          /*
-           const search = new Search({ view: view});
-           view.ui.add(legend, {position: 'top-right', index: 0});
-           */
-
-          // LAYER LIST //
-          /*const layerList = new LayerList({
-           container: 'layer-list-container',
-           view: view,
-           listItemCreatedFunction: (event) => {
-           event.item.open = (event.item.layer.type === 'group');
-           },
-           visibleElements: {statusIndicators: true}
-           });*/
 
           // VIEW UPDATING //
           this.disableViewUpdating = false;
@@ -133,59 +114,6 @@ class Application extends AppBase {
 
   /**
    *
-   * @param treesLayer
-   * @returns {Promise<unknown>}
-   */
-  displayTop10TreeTypes(treesLayer) {
-    return new Promise((resolve, reject) => {
-
-      // TREE TYPE TEMPLATE = CALCITE TILE SELECT //
-      const treeTypeTemplate = document.getElementById('tree-type-template');
-      const _createItemNode = () => {
-        const templateNode = treeTypeTemplate.content.cloneNode(true);
-        return templateNode.querySelector('calcite-tile-select');
-      };
-
-      // TREE TYPE LIST //
-      const treeTypeList = document.getElementById('tree-type-list');
-
-      // TOP 1O QUERY //
-      const top10Query = treesLayer.createQuery();
-      top10Query.set({
-        where: '(spc_common is not null)',
-        outFields: ['spc_common'],
-        groupByFieldsForStatistics: ['spc_common', 'spc_latin'],
-        orderByFields: ['count(*) desc'],
-        outStatistics: [{"statisticType": "count", "onStatisticField": "*", "outStatisticFieldName": "countOFExpr"}],
-        num: 10
-      });
-      treesLayer.queryFeatures(top10Query).then((top10FS) => {
-        const treeTypeItemNodes = top10FS.features.map(feature => {
-
-          const species = feature.getAttribute('spc_common');
-          const latin = feature.getAttribute('spc_latin');
-          const count = feature.getAttribute('countOFExpr');
-
-          const treeItemNode = _createItemNode();
-          treeItemNode.setAttribute('heading', species.toUpperCase());
-          treeItemNode.setAttribute('title', latin);
-          treeItemNode.setAttribute('description', `count: ${ count.toLocaleString() }`);
-          treeItemNode.setAttribute('value', species);
-
-          const treeThumb = treeItemNode.querySelector('.tree-thumbnail');
-          treeThumb.src = `./assets/trees/${ species.toLowerCase().replace(/ /, '_') }.jpg`
-
-          return treeItemNode
-        });
-        treeTypeList.replaceChildren(...treeTypeItemNodes);
-
-        resolve({treeTypeList});
-      });
-    });
-  }
-
-  /**
-   *
    * @param view
    */
   initializeTreeTypeLayer({view}) {
@@ -194,10 +122,13 @@ class Application extends AppBase {
       const treeTypeLayer = view.map.layers.find(l => l.title === "Trees in New York");
       treeTypeLayer.load().then(() => {
 
-        treeTypeLayer.popupEnabled = false;
+        treeTypeLayer.set({
+          popupEnabled: false,
+          outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'borough', 'health'],
+        });
 
-        // INITIALIZE SUMMARY //
-        this.initializeSummary({view, treeTypeLayer});
+        // LOCATION FILTERS //
+        this.initializeLocationFilters({view, treeTypeLayer});
 
         // DISPLAY LIST OF TOP 1O TREE SPECIES //
         this.displayTop10TreeTypes(treeTypeLayer).then(({treeTypeList}) => {
@@ -229,6 +160,58 @@ class Application extends AppBase {
             });
           });
         });
+      });
+    });
+  }
+
+  /**
+   *
+   * @param treesLayer
+   * @returns {Promise<unknown>}
+   */
+  displayTop10TreeTypes(treesLayer) {
+    return new Promise((resolve, reject) => {
+
+      // TREE TYPE TEMPLATE = CALCITE TILE SELECT //
+      const treeTypeTemplate = document.getElementById('tree-type-template');
+      const _createItemNode = () => {
+        const templateNode = treeTypeTemplate.content.cloneNode(true);
+        return templateNode.querySelector('calcite-tile-select');
+      };
+
+      // TREE TYPE LIST //
+      const treeTypeList = document.getElementById('tree-type-list');
+
+      // TOP 1O QUERY //
+      const top10Query = treesLayer.createQuery();
+      top10Query.set({
+        where: '(spc_common is not null)',
+        groupByFieldsForStatistics: ['spc_common', 'spc_latin'],
+        outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}],
+        orderByFields: ['SpeciesCount desc'],
+        num: 10
+      });
+      treesLayer.queryFeatures(top10Query).then((top10FS) => {
+        const treeTypeItemNodes = top10FS.features.map(feature => {
+
+          const species = feature.getAttribute('spc_common');
+          const latin = feature.getAttribute('spc_latin');
+          const count = feature.getAttribute('SpeciesCount');
+
+          const treeItemNode = _createItemNode();
+          treeItemNode.setAttribute('heading', species.toUpperCase());
+          treeItemNode.setAttribute('title', latin);
+          treeItemNode.setAttribute('description', `count: ${ count.toLocaleString() }`);
+          treeItemNode.setAttribute('value', species);
+
+          const treeThumb = treeItemNode.querySelector('.tree-thumbnail');
+          treeThumb.src = `./assets/trees/${ species.toLowerCase().replace(/ /, '_') }.jpg`
+
+          return treeItemNode
+        });
+        treeTypeList.replaceChildren(...treeTypeItemNodes);
+
+        resolve({treeTypeList});
       });
     });
   }
@@ -280,7 +263,7 @@ class Application extends AppBase {
               filter: {
                 where: filters.join(' AND ')
               },
-              excludedEffect: 'opacity(0.2) blur(5px)'
+              excludedEffect: 'opacity(0.3) blur(5px)'
             };
           });
 
@@ -309,7 +292,7 @@ class Application extends AppBase {
 
             histogram(params).then((histogramResponse) => {
               slider.set({
-                bins: histogramResponse.bins,
+                bins: histogramResponse.bins
               });
               updateFeatureEffect();
             });
@@ -338,15 +321,51 @@ class Application extends AppBase {
 
   /**
    *
-   *  Biggest tree (by dbh) in the buffer
-   *    highlight and show biggest tree with a label?
-   *  Most common tree in the buffer
-   *  Avg tree size in buffer
+   * @param view
+   * @param treeTypeLayer
+   */
+  initializeLocationFilters({view, treeTypeLayer}) {
+
+    // INITIALIZE SUMMARY //
+    this.initializeLocationSummary({view, treeTypeLayer});
+
+
+    // BOROUGH LIST //
+    const boroughList = document.getElementById('borough-list');
+
+    const boroughQuery = treeTypeLayer.createQuery();
+    boroughQuery.set({
+      where: '(1=1)',
+      outFields: ['borough'],
+      orderByFields: ['borough asc'],
+      returnDistinctValues: true,
+      returnGeometry: false
+    });
+    treeTypeLayer.queryFeatures(boroughQuery).then((boroughFS) => {
+
+      const boroughItems = boroughFS.features.map(feature => {
+        const boroughName = feature.attributes.borough;
+        const boroughItem = document.createElement('calcite-radio-group-item');
+        boroughItem.setAttribute('value', boroughName);
+        boroughItem.innerHTML = boroughName;
+        return boroughItem;
+      });
+      boroughList.replaceChildren(...boroughItems);
+
+    });
+
+
+  }
+
+
+  /**
+   *
+   * https://geoxc.maps.arcgis.com/home/item.html?id=eb17c8cdeef940f0a83a762a643e9e5b
    *
    * @param view
    * @param treeTypeLayer
    */
-  initializeSummary({view, treeTypeLayer}) {
+  initializeLocationSummary({view, treeTypeLayer}) {
     require([
       "esri/core/Handles",
       "esri/core/promiseUtils",
@@ -356,15 +375,18 @@ class Application extends AppBase {
     ], (Handles, promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
 
 
+      const highlightColor1 = '#ffa200';
+      const highlightColor2 = '#ffffff';
+
       const locationGraphic = new Graphic({
         symbol: {
           type: 'simple-marker',
-          style: "circle",
-          color: "white",
+          style: "cross",
+          color: highlightColor2,
           size: "15pt",
           outline: {
-            color: "orange",
-            width: 2.5
+            color: highlightColor1,
+            width: 3
           }
         }
       });
@@ -376,20 +398,38 @@ class Application extends AppBase {
           style: "diagonal-cross",
           outline: {
             color: "orange",
-            width: 2.5
+            width: 2.2
           }
         }
+      });
+
+      const getTextSymbol = (label, relativePosition) => {
+        return {
+          type: "text",
+          color: highlightColor2,
+          haloColor: highlightColor1,
+          haloSize: "1px", text: label,
+          xoffset: (relativePosition ? 15 : -15),
+          verticalAlignment: 'middle',
+          horizontalAlignment: (relativePosition ? 'left' : 'right'),
+          font: {
+            size: 13, family: "Avenir Next LT Pro"
+          }
+        }
+      }
+
+      const biggestLabelGraphic = new Graphic({
+        symbol: getTextSymbol("Biggest Tree")
       });
 
       const biggestGraphic = new Graphic({
         symbol: {
           type: 'simple-marker',
-          style: "square",
-          color: "blue",
-          size: "21pt",
+          style: "circle",
+          color: highlightColor2,
+          size: "9pt",
           outline: {
-            color: 'dodgerblue',
-            width: 3
+            color: highlightColor1, width: 1.8
           }
         }
       });
@@ -397,8 +437,8 @@ class Application extends AppBase {
       // ANALYSIS LAYER //
       const analysisGraphicsLayer = new GraphicsLayer({
         title: 'Filter by Location',
-        effect: 'drop-shadow(1px,1px,2px)',
-        graphics: [searchGraphic, locationGraphic, biggestGraphic]
+        effect: 'drop-shadow(1px,1px,1px)',
+        graphics: [searchGraphic, locationGraphic, biggestGraphic, biggestLabelGraphic]
       });
       view.map.add(analysisGraphicsLayer);
 
@@ -407,49 +447,146 @@ class Application extends AppBase {
         // SUMMARY DETAILS LABELS //
         const summaryBiggestTypeLabel = document.getElementById('summary-biggest-type-label');
         const summaryBiggestAddressLabel = document.getElementById('summary-biggest-address-label');
+        const summaryBiggestSizeLabel = document.getElementById('summary-biggest-size-label');
         const summaryCommonTypeLabel = document.getElementById('summary-common-type-label');
+        const summaryCommonCountLabel = document.getElementById('summary-common-count-label');
         const summaryAvgSizeLabel = document.getElementById('summary-avg-size-label');
 
         // ABORT ERROR HANDLER //
         const _abortHandler = error => { if (error.name !== "AbortError") { console.error(error); } }
 
-        // UPDATE SUMMARY DETAILS //
-        const updateSummaryDetails = promiseUtils.debounce(() => {
+        // BIGGEST TREE //
+        const getBiggestTree = promiseUtils.debounce(() => {
+          if (searchGraphic.geometry) {
+            const summaryQuery = treeTypeLayerView.createQuery();
+            summaryQuery.set({
+              geometry: searchGraphic.geometry,
+              where: '(1=1)',
+              outFields: ['tree_dbh', 'spc_common', 'address', 'borough'],
+              orderByFields: ['tree_dbh desc'],
+              returnGeometry: true,
+              num: 1
+            });
+            return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
+              const biggestTree = summaryFS.features[0];
+              const biggestTreeAtts = biggestTree.attributes;
 
+              const treeSpecies = biggestTreeAtts.spc_common.toUpperCase();
+              const treeDiameter = biggestTreeAtts.tree_dbh.toLocaleString();
+
+              summaryBiggestTypeLabel.innerHTML = treeSpecies;
+              summaryBiggestAddressLabel.innerHTML = `${ biggestTreeAtts.address }, ${ biggestTreeAtts.borough }`;
+              summaryBiggestSizeLabel.innerHTML = treeDiameter;
+
+              biggestGraphic.geometry = biggestTree.geometry;
+
+              const relativePosition = (biggestTree.geometry.longitude > locationGraphic.geometry.longitude);
+
+              biggestLabelGraphic.set({
+                geometry: biggestTree.geometry,
+                symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
+              });
+
+            });
+          } else {
+            summaryBiggestTypeLabel.innerHTML = '';
+            summaryBiggestAddressLabel.innerHTML = '';
+            summaryBiggestSizeLabel.innerHTML = '';
+            biggestGraphic.geometry = null;
+            biggestLabelGraphic.geometry = null;
+            return Promise.resolve();
+          }
+        });
+
+        // MOST COMMON TREE //
+        const getMostCommonTree = promiseUtils.debounce(() => {
+          if (searchGraphic.geometry) {
+            const summaryQuery = treeTypeLayerView.createQuery();
+            summaryQuery.set({
+              geometry: searchGraphic.geometry,
+              where: '(spc_common is not null)',
+              outFields: ['spc_common'],
+              groupByFieldsForStatistics: ['spc_common'],
+              orderByFields: ['SpeciesCount desc'],
+              outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}],
+              num: 1
+            });
+            return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
+              const mostCommonTree = summaryFS.features[0].attributes;
+              summaryCommonTypeLabel.innerHTML = mostCommonTree.spc_common.toUpperCase();
+              summaryCommonCountLabel.innerHTML = mostCommonTree.SpeciesCount.toLocaleString();
+            });
+          } else {
+            summaryCommonTypeLabel.innerHTML = '';
+            summaryCommonCountLabel.innerHTML = '';
+            return Promise.resolve();
+          }
+        });
+
+        // AVERAGE FORMATTER //
+        const avgFormatter = new Intl.NumberFormat('default', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+        // AVERAGE SIZE //
+        const getAverageTreeSize = promiseUtils.debounce(() => {
           if (searchGraphic.geometry) {
 
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
               geometry: searchGraphic.geometry,
               where: '(1=1)',
-              outFields: ['spc_common'],
-              outStatistics: [
-                {"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "avgTreeSize"},
-                {"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "count"}
-              ]
+              outStatistics: [{"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "AvgTreeSize"}]
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const stats = summaryFS.features[0].attributes;
-
-              summaryBiggestTypeLabel.innerHTML = '';
-              summaryBiggestAddressLabel.innerHTML = '';
-              summaryCommonTypeLabel.innerHTML = '';
-
-              summaryAvgSizeLabel.innerHTML = stats.avgTreeSize.toLocaleString();
-
+              summaryAvgSizeLabel.innerHTML = avgFormatter.format(stats.AvgTreeSize);
             });
 
           } else {
-
-            summaryBiggestTypeLabel.innerHTML = '';
-            summaryBiggestAddressLabel.innerHTML = '';
-            summaryCommonTypeLabel.innerHTML = '';
             summaryAvgSizeLabel.innerHTML = '';
+            return Promise.resolve();
+          }
+        });
+
+        // TREE HEALTH //
+        const getTreeHealth = promiseUtils.debounce(() => {
+          if (searchGraphic.geometry) {
+
+            const summaryQuery = treeTypeLayerView.createQuery();
+            summaryQuery.set({
+              geometry: searchGraphic.geometry,
+              where: '(1=1)',
+              outFields: ['health'],
+              groupByFieldsForStatistics: ['health'],
+              orderByFields: ['HealthCount desc'],
+              outStatistics: [{"statisticType": "count", "onStatisticField": "health", "outStatisticFieldName": "HealthCount"}]
+            });
+            return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
+              const healthInfo = summaryFS.features.map((infos, feature) => {
+                const health = feature.attributes.health;
+                const count = feature.attributes.HealthCount;
+
+                infos.health[health] = count
+                infos.total += count;
+
+                return infos;
+              }, {total: 0, health: {Good: 0, Fair: 0, Poor: 0, Other: 0}});
+
+            });
+          } else {
 
             return Promise.resolve();
           }
         });
 
+        // UPDATE SUMMARY DETAILS //
+        const updateSummaryDetails = promiseUtils.debounce(() => {
+          return Promise.all([
+            getBiggestTree(),
+            getMostCommonTree(),
+            getAverageTreeSize(),
+            //getTreeHealth()
+          ]).catch(_abortHandler);
+        });
 
         // SEARCH DISTANCE SLIDER //
         const searchDistanceSlider = document.getElementById('search-distance-slider');
@@ -523,7 +660,10 @@ class Application extends AppBase {
     });
   }
 
+
+
 }
 
 export default new Application();
+
 

@@ -90,7 +90,7 @@ calcite-notice {
 }
 
 #bottom-container {
-  max-height: 350px;
+
 }
 
 #histogram-container {
@@ -99,7 +99,7 @@ calcite-notice {
   min-width: 0;
   min-height: 0;
   width: auto;
-  margin: 30px 50px 30px 50px;
+  margin: 25px 50px 25px 50px;
   --calcite-ui-foreground-1: transparent;
 }
 
@@ -126,4 +126,13 @@ calcite-tile-select {
 
 .details-label {
   padding-left: 2rem;
+}
+
+.details-label > calcite-label > div:nth-child(2) {
+  color: var(--calcite-ui-brand);
+  font-weight: bold;
+}
+
+calcite-shell-center-row[height-scale="m"] {
+  height: 50%;
 }
