@@ -124,7 +124,7 @@ class Application extends AppBase {
 
         treeTypeLayer.set({
           popupEnabled: false,
-          outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'borough', 'health'],
+          outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health'],
         });
 
         // LOCATION FILTERS //
@@ -329,6 +329,10 @@ class Application extends AppBase {
     // INITIALIZE SUMMARY //
     this.initializeLocationSummary({view, treeTypeLayer});
 
+
+    //
+    // TODO: USE nta_name TO BUILD LIST OF NEIGHBORHOODS...
+    //
 
     // BOROUGH LIST //
     const boroughList = document.getElementById('borough-list');
@@ -659,7 +663,6 @@ class Application extends AppBase {
       });
     });
   }
-
 
 
 }
