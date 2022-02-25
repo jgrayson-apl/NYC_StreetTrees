@@ -211,6 +211,14 @@ class Application extends AppBase {
     return new Promise((resolve, reject) => {
       require(["esri/core/promiseUtils", "esri/smartMapping/statistics/histogram", "esri/widgets/HistogramRangeSlider"], (promiseUtils, histogram, HistogramRangeSlider) => {
 
+        // TREE TYPE LIST //
+        const treeTypeList = document.getElementById('tree-type-list');
+        const disableTreeTypeList = (disabled) => {
+          treeTypeList.querySelectorAll('calcite-tile-select').forEach(tileSelect => {
+            tileSelect.toggleAttribute('disabled', disabled);
+          });
+        }
+
         view.whenLayerView(treeTypeLayer).then(treeTypeLayerView => {
 
           const statField = 'tree_dbh';
@@ -294,6 +302,7 @@ class Application extends AppBase {
           }
 
           const startAnimation = () => {
+            disableTreeTypeList(true);
             histogramResetBtn.toggleAttribute('disabled', true);
             histogramPlayBtn.toggleAttribute('active', true);
             histogramPlayBtn.setAttribute('appearance', 'solid');
@@ -303,6 +312,7 @@ class Application extends AppBase {
           }
 
           const stopAnimation = () => {
+            disableTreeTypeList(false);
             histogramResetBtn.toggleAttribute('disabled', false);
             histogramPlayBtn.toggleAttribute('active', false);
             histogramPlayBtn.setAttribute('appearance', 'outline');
