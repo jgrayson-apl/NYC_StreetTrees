@@ -15,7 +15,6 @@
  */
 
 import AppParameters from "./AppParameters.js";
-import AdobeAnalyticsUtils from "./AdobeAnalyticsUtils.js";
 
 class AppBase extends AppParameters {
 
@@ -36,9 +35,6 @@ class AppBase extends AppParameters {
    */
   constructor() {
     super();
-
-    // ADOBE ANALYTICS //
-    const analyticsUtils = new AdobeAnalyticsUtils({source: this});
 
     // EVENTED AND WATCHUTILS //
     require(['esri/core/Evented', 'esri/core/watchUtils'], (Evented, watchUtils) => {

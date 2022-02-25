@@ -105,64 +105,53 @@ class Application extends AppBase {
       // VIEW READY //
       this.configView(view).then(() => {
 
-        this.initializeTreeTypeLayer({view});
+        const treeTypeLayer = view.map.layers.find(l => l.title === "Trees in New York");
+        treeTypeLayer.load().then(() => {
+
+          treeTypeLayer.set({
+            popupEnabled: false, outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health'],
+          });
+
+          // LOCATION FILTERS //
+          this.initializeLocationFilters({view, treeTypeLayer});
+
+          // DISPLAY LIST OF TOP 1O TREE SPECIES //
+          this.displayTop10TreeTypes(treeTypeLayer).then(({treeTypeList}) => {
+
+            // INITIALIZE HISTOGRAM //
+            this.initializeTreeHistogram({view, treeTypeLayer}).then(() => {
+
+              // CLEAR SELECTION //
+              const clearSelectionBtn = document.getElementById('clear-selection-btn');
+              clearSelectionBtn.addEventListener('click', () => {
+
+                // CLEAR TILE SELECT //
+                treeTypeList.querySelectorAll('calcite-tile-select').forEach(tileSelect => {
+                  tileSelect.toggleAttribute('checked', false);
+                });
+
+                // UPDATE HISTOGRAM SLIDER //
+                this.updateSliderBins();
+              });
+
+              // SET SPECIES SELECTION //
+              treeTypeList.addEventListener('calciteTileSelectChange', (evt) => {
+
+                // TREE SPECIES //
+                const treeSpecies = evt.srcElement.value;
+
+                // UPDATE HISTOGRAM SLIDER //
+                this.updateSliderBins(treeSpecies);
+              });
+            });
+          });
+        });
 
         resolve();
       }).catch(reject);
     });
   }
 
-  /**
-   *
-   * @param view
-   */
-  initializeTreeTypeLayer({view}) {
-    require(["esri/core/promiseUtils"], (promiseUtils) => {
-
-      const treeTypeLayer = view.map.layers.find(l => l.title === "Trees in New York");
-      treeTypeLayer.load().then(() => {
-
-        treeTypeLayer.set({
-          popupEnabled: false,
-          outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health'],
-        });
-
-        // LOCATION FILTERS //
-        this.initializeLocationFilters({view, treeTypeLayer});
-
-        // DISPLAY LIST OF TOP 1O TREE SPECIES //
-        this.displayTop10TreeTypes(treeTypeLayer).then(({treeTypeList}) => {
-
-          // INITIALIZE HISTOGRAM //
-          this.initializeTreeHistogram({view, treeTypeLayer}).then(() => {
-
-            // CLEAR SELECTION //
-            const clearSelectionBtn = document.getElementById('clear-selection-btn');
-            clearSelectionBtn.addEventListener('click', () => {
-
-              // CLEAR TILE SELECT //
-              treeTypeList.querySelectorAll('calcite-tile-select').forEach(tileSelect => {
-                tileSelect.toggleAttribute('checked', false);
-              });
-
-              // UPDATE HISTOGRAM SLIDER //
-              this.updateSliderBins();
-            });
-
-            // SET SPECIES SELECTION //
-            treeTypeList.addEventListener('calciteTileSelectChange', (evt) => {
-
-              // TREE SPECIES //
-              const treeSpecies = evt.srcElement.value;
-
-              // UPDATE HISTOGRAM SLIDER //
-              this.updateSliderBins(treeSpecies);
-            });
-          });
-        });
-      });
-    });
-  }
 
   /**
    *
@@ -185,11 +174,7 @@ class Application extends AppBase {
       // TOP 1O QUERY //
       const top10Query = treesLayer.createQuery();
       top10Query.set({
-        where: '(spc_common is not null)',
-        groupByFieldsForStatistics: ['spc_common', 'spc_latin'],
-        outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}],
-        orderByFields: ['SpeciesCount desc'],
-        num: 10
+        where: '(spc_common is not null)', groupByFieldsForStatistics: ['spc_common', 'spc_latin'], outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}], orderByFields: ['SpeciesCount desc'], num: 10
       });
       treesLayer.queryFeatures(top10Query).then((top10FS) => {
         const treeTypeItemNodes = top10FS.features.map(feature => {
@@ -224,30 +209,18 @@ class Application extends AppBase {
    */
   initializeTreeHistogram({view, treeTypeLayer}) {
     return new Promise((resolve, reject) => {
-      require([
-        "esri/core/promiseUtils",
-        "esri/smartMapping/statistics/histogram",
-        "esri/widgets/HistogramRangeSlider"
-      ], (promiseUtils, histogram, HistogramRangeSlider) => {
+      require(["esri/core/promiseUtils", "esri/smartMapping/statistics/histogram", "esri/widgets/HistogramRangeSlider"], (promiseUtils, histogram, HistogramRangeSlider) => {
 
         view.whenLayerView(treeTypeLayer).then(treeTypeLayerView => {
 
           const statField = 'tree_dbh';
-          const min = 0;
-          const max = 50;
+          const diameterMin = 0;
+          const diameterMax = 50;
 
-          const slider = new HistogramRangeSlider({
-            container: "histogram-container",
-            rangeType: "between",
-            includedBarColor: '#7bb07f',
-            excludedBarColor: '#e6f0e6',
-            precision: 0,
-            min: min, max: max,
-            values: [min, max],
-            labelFormatFunction: (value, type) => {
+          const histogramSlider = new HistogramRangeSlider({
+            container: "histogram-container", rangeType: "between", includedBarColor: '#7bb07f', excludedBarColor: '#e6f0e6', precision: 0, min: diameterMin, max: diameterMax, values: [diameterMin, diameterMax], labelFormatFunction: (value, type) => {
               return value.toFixed(0);
-            },
-            barCreatedFunction: (index, element) => {
+            }, barCreatedFunction: (index, element) => {
               element.setAttribute("stroke-width", "0.8");
               element.setAttribute("stroke", "#f8f8f8");
             }
@@ -256,24 +229,19 @@ class Application extends AppBase {
           // UPDATE THE LAYER FILTER //
           const updateFeatureEffect = promiseUtils.debounce(() => {
 
-            const filters = [slider.generateWhereClause(statField)];
+            const filters = [histogramSlider.generateWhereClause(statField)];
             treeSpeciesFilter && filters.push(treeSpeciesFilter);
 
             treeTypeLayerView.featureEffect = {
               filter: {
                 where: filters.join(' AND ')
-              },
-              excludedEffect: 'opacity(0.3) blur(5px)'
+              }, excludedEffect: 'opacity(0.3) blur(5px)'
             };
           });
 
           // DEFAULT HISTOGRAM PARAMETERS //
           const defaultHistogramParams = {
-            layer: treeTypeLayer,
-            field: statField,
-            numBins: max,
-            minValue: min,
-            maxValue: max
+            layer: treeTypeLayer, field: statField, numBins: diameterMax, minValue: diameterMin, maxValue: diameterMax
           };
 
           // TREE SPECIES FILTER //
@@ -283,15 +251,12 @@ class Application extends AppBase {
           this.updateSliderBins = (treeSpecies) => {
             treeSpeciesFilter = treeSpecies ? `(spc_common = '${ treeSpecies }')` : null;
 
-            const params = treeSpeciesFilter
-              ? {
-                ...defaultHistogramParams,
-                sqlWhere: treeSpeciesFilter
-              }
-              : defaultHistogramParams;
+            const params = treeSpeciesFilter ? {
+              ...defaultHistogramParams, sqlWhere: treeSpeciesFilter
+            } : defaultHistogramParams;
 
             histogram(params).then((histogramResponse) => {
-              slider.set({
+              histogramSlider.set({
                 bins: histogramResponse.bins
               });
               updateFeatureEffect();
@@ -300,17 +265,55 @@ class Application extends AppBase {
           this.updateSliderBins();
 
           // UPDATE THE LAYER FILTER WHEN USER CHANGES RANGE //
-          slider.on(["thumb-change", "thumb-drag", "segment-drag"], () => {
-            updateFeatureEffect();
-          });
+          histogramSlider.watch('values', () => { updateFeatureEffect(); })
 
           // RESET MIN/MAX RANGE //
           const histogramResetBtn = document.getElementById('histogram-reset-btn');
           histogramResetBtn.addEventListener('click', () => {
-            slider.set({
-              values: [min, max]
-            });
-            updateFeatureEffect();
+            histogramSlider.set({values: [diameterMin, diameterMax]});
+          });
+
+          const animationWindow = 6;
+          const animationStep = 1;
+          const animationDelay = 1000;
+          let animationIndex = 0;
+          let isAnimating = false;
+
+          const animateBins = () => {
+            histogramSlider.set({values: [animationIndex, animationIndex + animationWindow]});
+            const isNotAtEnd = ((animationIndex + animationWindow) < diameterMax);
+            if (isAnimating && isNotAtEnd) {
+              animationIndex += animationStep;
+              setTimeout(() => {
+                requestAnimationFrame(animateBins);
+              }, animationDelay);
+            } else {
+              if (!isNotAtEnd) { animationIndex = 0; }
+              stopAnimation();
+            }
+          }
+
+          const startAnimation = () => {
+            histogramPlayBtn.setAttribute('appearance', 'solid');
+            histogramPlayBtn.setAttribute('icon-start', 'pause-f');
+            isAnimating = true;
+            requestAnimationFrame(animateBins);
+          }
+
+          const stopAnimation = () => {
+            isAnimating = false;
+            histogramPlayBtn.toggleAttribute('active', false);
+            histogramPlayBtn.setAttribute('appearance', 'outline');
+            histogramPlayBtn.setAttribute('icon-start', 'play-f');
+          }
+
+          const histogramPlayBtn = document.getElementById('histogram-play-btn');
+          histogramPlayBtn.addEventListener('click', () => {
+            if (histogramPlayBtn.toggleAttribute('active')) {
+              startAnimation();
+            } else {
+              stopAnimation();
+            }
           });
 
           resolve();
@@ -321,118 +324,46 @@ class Application extends AppBase {
 
   /**
    *
-   * @param view
-   * @param treeTypeLayer
-   */
-  initializeLocationFilters({view, treeTypeLayer}) {
-
-    // INITIALIZE SUMMARY //
-    this.initializeLocationSummary({view, treeTypeLayer});
-
-
-    //
-    // TODO: USE nta_name TO BUILD LIST OF NEIGHBORHOODS...
-    //
-
-    // BOROUGH LIST //
-    const boroughList = document.getElementById('borough-list');
-
-    const boroughQuery = treeTypeLayer.createQuery();
-    boroughQuery.set({
-      where: '(1=1)',
-      outFields: ['borough'],
-      orderByFields: ['borough asc'],
-      returnDistinctValues: true,
-      returnGeometry: false
-    });
-    treeTypeLayer.queryFeatures(boroughQuery).then((boroughFS) => {
-
-      const boroughItems = boroughFS.features.map(feature => {
-        const boroughName = feature.attributes.borough;
-        const boroughItem = document.createElement('calcite-radio-group-item');
-        boroughItem.setAttribute('value', boroughName);
-        boroughItem.innerHTML = boroughName;
-        return boroughItem;
-      });
-      boroughList.replaceChildren(...boroughItems);
-
-    });
-
-
-  }
-
-
-  /**
-   *
    * https://geoxc.maps.arcgis.com/home/item.html?id=eb17c8cdeef940f0a83a762a643e9e5b
    *
    * @param view
    * @param treeTypeLayer
    */
   initializeLocationSummary({view, treeTypeLayer}) {
-    require([
-      "esri/core/Handles",
-      "esri/core/promiseUtils",
-      "esri/Graphic",
-      "esri/layers/GraphicsLayer",
-      "esri/geometry/geometryEngine"
-    ], (Handles, promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
-
+    require(["esri/core/Handles", "esri/core/promiseUtils", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/geometry/geometryEngine"], (Handles, promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
 
       const highlightColor1 = '#ffa200';
       const highlightColor2 = '#ffffff';
 
       const locationGraphic = new Graphic({
         symbol: {
-          type: 'simple-marker',
-          style: "cross",
-          color: highlightColor2,
-          size: "15pt",
-          outline: {
-            color: highlightColor1,
-            width: 3
+          type: 'simple-marker', style: "cross", color: highlightColor2, size: "15pt", outline: {
+            color: highlightColor1, width: 3
           }
         }
       });
 
       const searchGraphic = new Graphic({
         symbol: {
-          type: 'simple-fill',
-          color: 'transparent',
-          style: "diagonal-cross",
-          outline: {
-            color: "orange",
-            width: 2.2
+          type: 'simple-fill', color: 'transparent', style: "diagonal-cross", outline: {
+            color: "orange", width: 2.2
           }
         }
       });
 
       const getTextSymbol = (label, relativePosition) => {
         return {
-          type: "text",
-          color: highlightColor2,
-          haloColor: highlightColor1,
-          haloSize: "1px", text: label,
-          xoffset: (relativePosition ? 15 : -15),
-          verticalAlignment: 'middle',
-          horizontalAlignment: (relativePosition ? 'left' : 'right'),
-          font: {
+          type: "text", color: highlightColor2, haloColor: highlightColor1, haloSize: "1px", text: label, xoffset: (relativePosition ? 15 : -15), verticalAlignment: 'middle', horizontalAlignment: (relativePosition ? 'left' : 'right'), font: {
             size: 13, family: "Avenir Next LT Pro"
           }
         }
       }
 
-      const biggestLabelGraphic = new Graphic({
-        symbol: getTextSymbol("Biggest Tree")
-      });
+      const biggestLabelGraphic = new Graphic({symbol: getTextSymbol("Biggest Tree")});
 
       const biggestGraphic = new Graphic({
         symbol: {
-          type: 'simple-marker',
-          style: "circle",
-          color: highlightColor2,
-          size: "9pt",
-          outline: {
+          type: 'simple-marker', style: "circle", color: highlightColor2, size: "9pt", outline: {
             color: highlightColor1, width: 1.8
           }
         }
@@ -440,13 +371,34 @@ class Application extends AppBase {
 
       // ANALYSIS LAYER //
       const analysisGraphicsLayer = new GraphicsLayer({
-        title: 'Filter by Location',
-        effect: 'drop-shadow(1px,1px,1px)',
-        graphics: [searchGraphic, locationGraphic, biggestGraphic, biggestLabelGraphic]
+        title: 'Filter by Location', effect: 'drop-shadow(1px,1px,1px)', graphics: [searchGraphic, locationGraphic, biggestGraphic, biggestLabelGraphic]
       });
       view.map.add(analysisGraphicsLayer);
 
       view.whenLayerView(treeTypeLayer).then(treeTypeLayerView => {
+
+        // ABORT ERROR HANDLER //
+        const _abortHandler = error => { if (error.name !== "AbortError") { console.error(error); } }
+
+        // UPDATE SEARCH LOCATION AND AREA //
+        const _updateSearchLocationAndArea = (location) => {
+          locationGraphic.geometry = location;
+          searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
+        };
+
+        this.updateSearchLocationAndArea = (location) => {
+          if (location) {
+            if (!searchLocationBtn.hasAttribute('active')) {
+              searchLocationBtn.click();
+            }
+            _updateSearchLocationAndArea(location)
+            updateSummaryDetails().catch(_abortHandler);
+          } else {
+            if (searchLocationBtn.hasAttribute('active')) {
+              searchLocationBtn.click();
+            }
+          }
+        };
 
         // SUMMARY DETAILS LABELS //
         const summaryBiggestTypeLabel = document.getElementById('summary-biggest-type-label');
@@ -456,20 +408,13 @@ class Application extends AppBase {
         const summaryCommonCountLabel = document.getElementById('summary-common-count-label');
         const summaryAvgSizeLabel = document.getElementById('summary-avg-size-label');
 
-        // ABORT ERROR HANDLER //
-        const _abortHandler = error => { if (error.name !== "AbortError") { console.error(error); } }
 
         // BIGGEST TREE //
         const getBiggestTree = promiseUtils.debounce(() => {
           if (searchGraphic.geometry) {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry,
-              where: '(1=1)',
-              outFields: ['tree_dbh', 'spc_common', 'address', 'borough'],
-              orderByFields: ['tree_dbh desc'],
-              returnGeometry: true,
-              num: 1
+              geometry: searchGraphic.geometry, where: '(1=1)', outFields: ['tree_dbh', 'spc_common', 'address', 'borough'], orderByFields: ['tree_dbh desc'], returnGeometry: true, num: 1
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const biggestTree = summaryFS.features[0];
@@ -487,8 +432,7 @@ class Application extends AppBase {
               const relativePosition = (biggestTree.geometry.longitude > locationGraphic.geometry.longitude);
 
               biggestLabelGraphic.set({
-                geometry: biggestTree.geometry,
-                symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
+                geometry: biggestTree.geometry, symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
               });
 
             });
@@ -507,13 +451,7 @@ class Application extends AppBase {
           if (searchGraphic.geometry) {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry,
-              where: '(spc_common is not null)',
-              outFields: ['spc_common'],
-              groupByFieldsForStatistics: ['spc_common'],
-              orderByFields: ['SpeciesCount desc'],
-              outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}],
-              num: 1
+              geometry: searchGraphic.geometry, where: '(spc_common is not null)', outFields: ['spc_common'], groupByFieldsForStatistics: ['spc_common'], orderByFields: ['SpeciesCount desc'], outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}], num: 1
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const mostCommonTree = summaryFS.features[0].attributes;
@@ -536,9 +474,7 @@ class Application extends AppBase {
 
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry,
-              where: '(1=1)',
-              outStatistics: [{"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "AvgTreeSize"}]
+              geometry: searchGraphic.geometry, where: '(1=1)', outStatistics: [{"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "AvgTreeSize"}]
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const stats = summaryFS.features[0].attributes;
@@ -557,12 +493,7 @@ class Application extends AppBase {
 
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry,
-              where: '(1=1)',
-              outFields: ['health'],
-              groupByFieldsForStatistics: ['health'],
-              orderByFields: ['HealthCount desc'],
-              outStatistics: [{"statisticType": "count", "onStatisticField": "health", "outStatisticFieldName": "HealthCount"}]
+              geometry: searchGraphic.geometry, where: '(1=1)', outFields: ['health'], groupByFieldsForStatistics: ['health'], orderByFields: ['HealthCount desc'], outStatistics: [{"statisticType": "count", "onStatisticField": "health", "outStatisticFieldName": "HealthCount"}]
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const healthInfo = summaryFS.features.map((infos, feature) => {
@@ -574,21 +505,16 @@ class Application extends AppBase {
 
                 return infos;
               }, {total: 0, health: {Good: 0, Fair: 0, Poor: 0, Other: 0}});
-
+              //  TODO: do something with health info, maybe a chart?
             });
           } else {
-
             return Promise.resolve();
           }
         });
 
         // UPDATE SUMMARY DETAILS //
         const updateSummaryDetails = promiseUtils.debounce(() => {
-          return Promise.all([
-            getBiggestTree(),
-            getMostCommonTree(),
-            getAverageTreeSize(),
-            //getTreeHealth()
+          return Promise.all([getBiggestTree(), getMostCommonTree(), getAverageTreeSize(), //getTreeHealth()
           ]).catch(_abortHandler);
         });
 
@@ -596,7 +522,7 @@ class Application extends AppBase {
         const searchDistanceSlider = document.getElementById('search-distance-slider');
         searchDistanceSlider.addEventListener('calciteSliderInput', () => {
           if (locationGraphic.geometry) {
-            searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
+            _updateSearchLocationAndArea(locationGraphic.geometry);
             updateSummaryDetails().catch(_abortHandler);
           }
         });
@@ -632,8 +558,7 @@ class Application extends AppBase {
 
           // VIEW CLICK //
           const clickHandler = view.on('click', ({mapPoint}) => {
-            locationGraphic.geometry = mapPoint;
-            searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
+            _updateSearchLocationAndArea(mapPoint);
             updateSummaryDetails().catch(_abortHandler);
           });
 
@@ -649,8 +574,7 @@ class Application extends AppBase {
             dragEvt.stopPropagation();
             switch (dragEvt.action) {
               case 'update':
-                locationGraphic.geometry = view.toMap(dragEvt);
-                searchGraphic.geometry = geometryEngine.geodesicBuffer(locationGraphic.geometry, searchDistanceSlider.value, 'miles');
+                _updateSearchLocationAndArea(view.toMap(dragEvt));
                 updateSummaryDetails().catch(_abortHandler);
                 break;
             }
@@ -662,6 +586,76 @@ class Application extends AppBase {
 
       });
     });
+  }
+
+  /**
+   *
+   * @param view
+   * @param treeTypeLayer
+   */
+  initializeLocationFilters({view, treeTypeLayer}) {
+
+    // INITIALIZE SUMMARY //
+    this.initializeLocationSummary({view, treeTypeLayer});
+
+    //
+    // SET ANALYSIS LOCATION BY ADDRESS
+    //
+    require(['esri/widgets/Search'], (Search) => {
+
+      const search = new Search({
+        container: 'search-container',
+        view: view,
+        allPlaceholder: 'NYC address',
+        locationEnabled: false,
+        popupEnabled: false,
+        resultGraphicEnabled: false
+      });
+      search.when(() => {
+        const defaultSource = search.defaultSources.getItemAt(0);
+        defaultSource.set({
+          withinViewEnabled: true,
+          zoomScale: 50000
+        });
+      });
+      search.on('select-result', searchResult => {
+        this.updateSearchLocationAndArea(searchResult.result.feature.geometry);
+      });
+      search.on('search-clear', () => {
+        this.updateSearchLocationAndArea();
+      });
+
+    });
+
+
+    //
+    // TODO: USE nta_name TO BUILD LIST OF NEIGHBORHOODS...
+    //
+
+    // BOROUGH LIST //
+    /*const boroughList = document.getElementById('borough-list');
+
+     const boroughQuery = treeTypeLayer.createQuery();
+     boroughQuery.set({
+     where: '(1=1)',
+     outFields: ['borough'],
+     orderByFields: ['borough asc'],
+     returnDistinctValues: true,
+     returnGeometry: false
+     });
+     treeTypeLayer.queryFeatures(boroughQuery).then((boroughFS) => {
+
+     const boroughItems = boroughFS.features.map(feature => {
+     const boroughName = feature.attributes.borough;
+     const boroughItem = document.createElement('calcite-radio-group-item');
+     boroughItem.setAttribute('value', boroughName);
+     boroughItem.innerHTML = boroughName;
+     return boroughItem;
+     });
+     boroughList.replaceChildren(...boroughItems);
+
+     });*/
+
   }
 
 

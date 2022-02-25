@@ -12,7 +12,7 @@
     <link rel="icon" href="./assets/favicon.ico" sizes="32x32" type="image/vnd.microsoft.icon">
     <!-- TITLE -->
     <title class="application-title"></title>
-
+    
     <!-- CHARTJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -81,7 +81,8 @@
         <calcite-panel id="bottom-container" heading="Filter by Diameter" summary='measured at approximately 54" above the ground'>
           <calcite-action slot="header-actions-start" scale="s" icon="selection-filter"></calcite-action>
           <div slot="header-actions-end">
-            <calcite-button id="histogram-reset-btn" scale="s" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
+            <calcite-button id="histogram-play-btn" icon-start="play-f" appearance="outline"></calcite-button>
+            <calcite-button id="histogram-reset-btn" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
           </div>
           <div id="histogram-container"></div>
         </calcite-panel>
@@ -97,12 +98,12 @@
           <div slot="header-actions-end">
             <calcite-action icon="x" title="close panel" class="toggle-close" data-toggle="summary"></calcite-action>
           </div>
-  
+          
           <calcite-tabs id="summary-tabs" class="margin-s">
             <calcite-tab-nav slot="tab-nav">
               <calcite-tab-title active>Interactive</calcite-tab-title>
               <calcite-tab-title>By Address</calcite-tab-title>
-              <calcite-tab-title>By Borough</calcite-tab-title>
+              <calcite-tab-title hidden>By Borough</calcite-tab-title>
             </calcite-tab-nav>
             <calcite-tab class="padding-m" active>
               <calcite-label>
@@ -110,15 +111,13 @@
                 <calcite-button id="search-location-btn" icon-start="pin-plus" width="full" appearance="outline">set map location</calcite-button>
               </calcite-label>
             </calcite-tab>
-            <calcite-tab class="padding-m">
+            <calcite-tab class="padding-m" style="overflow:hidden;">
               <calcite-label>
                 <div>Address</div>
-                <calcite-input placeholder="nyc address" type="search" clearable>
-                  <calcite-button slot="action">Find</calcite-button>
-                </calcite-input>
+                <div id="search-container"></div>
               </calcite-label>
             </calcite-tab>
-            <calcite-tab class="padding-m">
+            <calcite-tab class="padding-m" hidden>
               <calcite-label>
                 <div>Borough</div>
                 <calcite-radio-group id="borough-list" scale="s" width="full"></calcite-radio-group>
@@ -222,7 +221,7 @@
         input-alignment="end"
         type="radio"
         width="full">
-        <img class="tree-thumbnail" height="100">
+        <img class="tree-thumbnail" height="80">
       </calcite-tile-select>
     </template>
   

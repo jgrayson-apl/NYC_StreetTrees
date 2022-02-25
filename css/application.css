@@ -89,10 +89,6 @@ calcite-notice {
   flex-direction: column;
 }
 
-#bottom-container {
-
-}
-
 #histogram-container {
   flex-grow: 1;
   flex-shrink: 1;
@@ -136,3 +132,39 @@ calcite-tile-select {
 calcite-shell-center-row[height-scale="m"] {
   height: 50%;
 }
+
+calcite-tabs {
+  min-height: 120px !important;
+}
+
+.esri-search {
+  position: absolute;
+  top: 135px;
+  left: 10px;
+  right: 10px;
+  width: auto !important;
+}
+
+calcite-panel > div[slot="header-actions-end"] {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-content: center;
+  align-items: center;
+  padding-right: 15px;
+}
+
+calcite-panel > div[slot="header-actions-end"] > calcite-button:not(:last-of-type) {
+  margin-right: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
