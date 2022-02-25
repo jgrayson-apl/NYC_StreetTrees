@@ -294,6 +294,8 @@ class Application extends AppBase {
           }
 
           const startAnimation = () => {
+            histogramResetBtn.toggleAttribute('disabled', true);
+            histogramPlayBtn.toggleAttribute('active', true);
             histogramPlayBtn.setAttribute('appearance', 'solid');
             histogramPlayBtn.setAttribute('icon-start', 'pause-f');
             isAnimating = true;
@@ -301,18 +303,19 @@ class Application extends AppBase {
           }
 
           const stopAnimation = () => {
-            isAnimating = false;
+            histogramResetBtn.toggleAttribute('disabled', false);
             histogramPlayBtn.toggleAttribute('active', false);
             histogramPlayBtn.setAttribute('appearance', 'outline');
             histogramPlayBtn.setAttribute('icon-start', 'play-f');
+            isAnimating = false;
           }
 
           const histogramPlayBtn = document.getElementById('histogram-play-btn');
           histogramPlayBtn.addEventListener('click', () => {
-            if (histogramPlayBtn.toggleAttribute('active')) {
-              startAnimation();
-            } else {
+            if (histogramPlayBtn.hasAttribute('active')) {
               stopAnimation();
+            } else {
+              startAnimation();
             }
           });
 
