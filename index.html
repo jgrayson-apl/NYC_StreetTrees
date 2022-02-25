@@ -81,8 +81,9 @@
         <calcite-panel id="bottom-container" heading="Filter by Diameter" summary='measured at approximately 54" above the ground'>
           <calcite-action slot="header-actions-start" scale="s" icon="selection-filter"></calcite-action>
           <div slot="header-actions-end">
-            <calcite-button id="histogram-play-btn" icon-start="play-f" appearance="outline"></calcite-button>
-            <calcite-button id="histogram-reset-btn" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
+            <calcite-button id="histogram-play-f-btn" title="smallest to biggest diameter" icon-start="forward-f" appearance="outline">small to big</calcite-button>
+            <calcite-button id="histogram-play-r-btn" title="biggest to smallest diameter" icon-end="reverse-f" appearance="outline">big to small</calcite-button>
+            <calcite-button id="histogram-reset-btn" title="clear histogram filter" icon-end="reset" appearance="outline">clear diameter filter</calcite-button>
           </div>
           <div id="histogram-container"></div>
         </calcite-panel>

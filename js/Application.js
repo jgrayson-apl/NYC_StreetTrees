@@ -109,7 +109,7 @@ class Application extends AppBase {
         treeTypeLayer.load().then(() => {
 
           treeTypeLayer.set({
-            popupEnabled: false, outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health'],
+            popupEnabled: false, outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health']
           });
 
           // LOCATION FILTERS //
@@ -152,7 +152,6 @@ class Application extends AppBase {
     });
   }
 
-
   /**
    *
    * @param treesLayer
@@ -190,9 +189,9 @@ class Application extends AppBase {
           treeItemNode.setAttribute('value', species);
 
           const treeThumb = treeItemNode.querySelector('.tree-thumbnail');
-          treeThumb.src = `./assets/trees/${ species.toLowerCase().replace(/ /, '_') }.jpg`
+          treeThumb.src = `./assets/trees/${ species.toLowerCase().replace(/ /, '_') }.jpg`;
 
-          return treeItemNode
+          return treeItemNode;
         });
         treeTypeList.replaceChildren(...treeTypeItemNodes);
 
@@ -217,7 +216,7 @@ class Application extends AppBase {
           treeTypeList.querySelectorAll('calcite-tile-select').forEach(tileSelect => {
             tileSelect.toggleAttribute('disabled', disabled);
           });
-        }
+        };
 
         view.whenLayerView(treeTypeLayer).then(treeTypeLayerView => {
 
@@ -273,61 +272,108 @@ class Application extends AppBase {
           this.updateSliderBins();
 
           // UPDATE THE LAYER FILTER WHEN USER CHANGES RANGE //
-          histogramSlider.watch('values', () => { updateFeatureEffect(); })
+          histogramSlider.watch('values', () => { updateFeatureEffect(); });
+
+          const DIRECTION = {REVERSE: -1, FORWARD: 1};
+
+          const animationDelay = 1000;
+          let animationWindow = 6;
+          let animationStep = 1;
+          let animationDirection = DIRECTION.FORWARD;
+          let animationIndex = diameterMin;
+          let isAnimating = false;
+          let timeoutHandle = null;
 
           // RESET MIN/MAX RANGE //
           const histogramResetBtn = document.getElementById('histogram-reset-btn');
           histogramResetBtn.addEventListener('click', () => {
+            resetAnimationIndex(animationDirection);
             histogramSlider.set({values: [diameterMin, diameterMax]});
           });
 
-          const animationWindow = 6;
-          const animationStep = 1;
-          const animationDelay = 1000;
-          let animationIndex = 0;
-          let isAnimating = false;
-
+          /**
+           * ANIMATE HISTOGRAM BINS
+           */
           const animateBins = () => {
             histogramSlider.set({values: [animationIndex, animationIndex + animationWindow]});
-            const isNotAtEnd = ((animationIndex + animationWindow) < diameterMax);
+
+            const isNotAtEnd = (animationDirection === DIRECTION.FORWARD)
+              ? ((animationIndex + animationWindow) < diameterMax)
+              : ((animationIndex - animationWindow) > diameterMin);
+
             if (isAnimating && isNotAtEnd) {
-              animationIndex += animationStep;
-              setTimeout(() => {
+              animationIndex += (animationStep * animationDirection);
+              timeoutHandle = setTimeout(() => {
                 requestAnimationFrame(animateBins);
               }, animationDelay);
             } else {
-              if (!isNotAtEnd) { animationIndex = 0; }
+              if (!isNotAtEnd) { resetAnimationIndex(animationDirection); }
               stopAnimation();
             }
-          }
+          };
 
-          const startAnimation = () => {
+          // RESET ANIMATION INDEX //
+          const resetAnimationIndex = (direction) => {
+            animationIndex = (direction === DIRECTION.FORWARD) ? diameterMin : (diameterMax - animationWindow);
+          };
+
+          // START ANIMATION //
+          const startAnimation = (direction) => {
+
+            if (direction !== animationDirection) { resetAnimationIndex(direction); }
+            animationDirection = direction;
+            updatePlayButtons();
+
             disableTreeTypeList(true);
             histogramResetBtn.toggleAttribute('disabled', true);
-            histogramPlayBtn.toggleAttribute('active', true);
-            histogramPlayBtn.setAttribute('appearance', 'solid');
-            histogramPlayBtn.setAttribute('icon-start', 'pause-f');
+
             isAnimating = true;
             requestAnimationFrame(animateBins);
-          }
+          };
 
+          // STOP ANIMATION //
           const stopAnimation = () => {
+            isAnimating = false;
+            clearTimeout(timeoutHandle);
+
+            histogramPlayFBtn.toggleAttribute('active', false);
+            histogramPlayRBtn.toggleAttribute('active', false);
+            updatePlayButtons();
+
             disableTreeTypeList(false);
             histogramResetBtn.toggleAttribute('disabled', false);
-            histogramPlayBtn.toggleAttribute('active', false);
-            histogramPlayBtn.setAttribute('appearance', 'outline');
-            histogramPlayBtn.setAttribute('icon-start', 'play-f');
-            isAnimating = false;
-          }
+          };
 
-          const histogramPlayBtn = document.getElementById('histogram-play-btn');
-          histogramPlayBtn.addEventListener('click', () => {
-            if (histogramPlayBtn.hasAttribute('active')) {
-              stopAnimation();
+          const histogramPlayFBtn = document.getElementById('histogram-play-f-btn');
+          histogramPlayFBtn.addEventListener('click', () => {
+            if (histogramPlayFBtn.toggleAttribute('active')) {
+              startAnimation(DIRECTION.FORWARD);
             } else {
-              startAnimation();
+              stopAnimation();
             }
           });
+
+          const histogramPlayRBtn = document.getElementById('histogram-play-r-btn');
+          histogramPlayRBtn.addEventListener('click', () => {
+            if (histogramPlayRBtn.toggleAttribute('active')) {
+              startAnimation(DIRECTION.REVERSE);
+            } else {
+              stopAnimation();
+            }
+          });
+
+          const updatePlayButtons = () => {
+            const isFActive = histogramPlayFBtn.hasAttribute('active');
+            const isRActive = histogramPlayRBtn.hasAttribute('active');
+
+            histogramPlayFBtn.setAttribute('appearance', isFActive ? 'solid' : 'outline');
+            histogramPlayFBtn.setAttribute('icon-start', isFActive ? 'pause-f' : 'forward-f');
+            histogramPlayRBtn.toggleAttribute('disabled', isFActive);
+
+            histogramPlayRBtn.setAttribute('appearance', isRActive ? 'solid' : 'outline');
+            histogramPlayRBtn.setAttribute('icon-end', isRActive ? 'pause-f' : 'reverse-f');
+            histogramPlayFBtn.toggleAttribute('disabled', isRActive);
+          };
 
           resolve();
         });
@@ -369,8 +415,8 @@ class Application extends AppBase {
           type: "text", color: highlightColor2, haloColor: highlightColor1, haloSize: "1px", text: label, xoffset: (relativePosition ? 15 : -15), verticalAlignment: 'middle', horizontalAlignment: (relativePosition ? 'left' : 'right'), font: {
             size: 13, family: "Avenir Next LT Pro"
           }
-        }
-      }
+        };
+      };
 
       const biggestLabelGraphic = new Graphic({symbol: getTextSymbol("Biggest Tree")});
 
@@ -391,7 +437,7 @@ class Application extends AppBase {
       view.whenLayerView(treeTypeLayer).then(treeTypeLayerView => {
 
         // ABORT ERROR HANDLER //
-        const _abortHandler = error => { if (error.name !== "AbortError") { console.error(error); } }
+        const _abortHandler = error => { if (error.name !== "AbortError") { console.error(error); } };
 
         // UPDATE SEARCH LOCATION AND AREA //
         const _updateSearchLocationAndArea = (location) => {
@@ -404,7 +450,7 @@ class Application extends AppBase {
             if (!searchLocationBtn.hasAttribute('active')) {
               searchLocationBtn.click();
             }
-            _updateSearchLocationAndArea(location)
+            _updateSearchLocationAndArea(location);
             updateSummaryDetails().catch(_abortHandler);
           } else {
             if (searchLocationBtn.hasAttribute('active')) {
@@ -420,7 +466,6 @@ class Application extends AppBase {
         const summaryCommonTypeLabel = document.getElementById('summary-common-type-label');
         const summaryCommonCountLabel = document.getElementById('summary-common-count-label');
         const summaryAvgSizeLabel = document.getElementById('summary-avg-size-label');
-
 
         // BIGGEST TREE //
         const getBiggestTree = promiseUtils.debounce(() => {
@@ -513,7 +558,7 @@ class Application extends AppBase {
                 const health = feature.attributes.health;
                 const count = feature.attributes.HealthCount;
 
-                infos.health[health] = count
+                infos.health[health] = count;
                 infos.total += count;
 
                 return infos;
@@ -527,7 +572,11 @@ class Application extends AppBase {
 
         // UPDATE SUMMARY DETAILS //
         const updateSummaryDetails = promiseUtils.debounce(() => {
-          return Promise.all([getBiggestTree(), getMostCommonTree(), getAverageTreeSize(), //getTreeHealth()
+          return Promise.all([
+            getBiggestTree(),
+            getMostCommonTree(),
+            getAverageTreeSize()
+            //getTreeHealth()
           ]).catch(_abortHandler);
         });
 
@@ -595,7 +644,7 @@ class Application extends AppBase {
 
           // EVENT HANDLES //
           eventHandles.add([clickHandler, moveHandle, dragHandle]);
-        }
+        };
 
       });
     });
@@ -627,8 +676,8 @@ class Application extends AppBase {
       search.when(() => {
         const defaultSource = search.defaultSources.getItemAt(0);
         defaultSource.set({
-          withinViewEnabled: true,
-          zoomScale: 50000
+          zoomScale: 50000,
+          filter: {geometry: treeTypeLayer.fullExtent}
         });
       });
       search.on('select-result', searchResult => {
@@ -639,7 +688,6 @@ class Application extends AppBase {
       });
 
     });
-
 
     //
     // TODO: USE nta_name TO BUILD LIST OF NEIGHBORHOODS...
@@ -670,7 +718,6 @@ class Application extends AppBase {
      });*/
 
   }
-
 
 }
 
