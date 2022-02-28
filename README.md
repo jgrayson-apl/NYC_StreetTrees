@@ -1,10 +1,14 @@
-# Application Template
-Simple application template that uses the ArcGIS API for JavaScript and Calcite Components.
+# Street Trees of New York City
+
+This application displays the 2015 Street Tree Census for NYC and allows for filtering by tree species and diameter. Additionally, summary information about the biggest tree, most common type, and average size are presented for a user defined area of interest either interactively or by street address.
+
+> Data provided by Department of Parks and Recreation (DRP).
+
+### The APIs
+This application uses the ArcGIS API for JavaScript and Calcite Components.
 
  - [ArcGIS API for Javascript](https://developers.arcgis.com/javascript/latest/api-reference/)
  - [Calcite Components](https://developers.arcgis.com/calcite-design-system/components/)
-
-*WARNING*: this is a new and evolving effort... things might not work as expected.
 
 
 #### For questions about the demo web application:

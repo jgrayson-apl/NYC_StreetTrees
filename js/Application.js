@@ -105,7 +105,7 @@ class Application extends AppBase {
       // VIEW READY //
       this.configView(view).then(() => {
 
-        const treeTypeLayer = view.map.layers.find(l => l.title === "Trees in New York");
+        const treeTypeLayer = view.map.layers.find(l => l.title === "Street Trees in NYC");
         treeTypeLayer.load().then(() => {
 
           treeTypeLayer.set({
@@ -284,13 +284,6 @@ class Application extends AppBase {
           let isAnimating = false;
           let timeoutHandle = null;
 
-          // RESET MIN/MAX RANGE //
-          const histogramResetBtn = document.getElementById('histogram-reset-btn');
-          histogramResetBtn.addEventListener('click', () => {
-            resetAnimationIndex(animationDirection);
-            histogramSlider.set({values: [diameterMin, diameterMax]});
-          });
-
           /**
            * ANIMATE HISTOGRAM BINS
            */
@@ -314,7 +307,9 @@ class Application extends AppBase {
 
           // RESET ANIMATION INDEX //
           const resetAnimationIndex = (direction) => {
-            animationIndex = (direction === DIRECTION.FORWARD) ? diameterMin : (diameterMax - animationWindow);
+            animationIndex = (direction === DIRECTION.FORWARD)
+              ? diameterMin
+              : (diameterMax - animationWindow);
           };
 
           // START ANIMATION //
@@ -374,6 +369,13 @@ class Application extends AppBase {
             histogramPlayRBtn.setAttribute('icon-end', isRActive ? 'pause-f' : 'reverse-f');
             histogramPlayFBtn.toggleAttribute('disabled', isRActive);
           };
+
+          // RESET MIN/MAX RANGE //
+          const histogramResetBtn = document.getElementById('histogram-reset-btn');
+          histogramResetBtn.addEventListener('click', () => {
+            resetAnimationIndex(animationDirection);
+            histogramSlider.set({values: [diameterMin, diameterMax]});
+          });
 
           resolve();
         });
