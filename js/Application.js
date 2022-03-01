@@ -59,7 +59,10 @@ class Application extends AppBase {
   configView(view) {
     return new Promise((resolve, reject) => {
       if (view) {
-        require(['esri/widgets/Home', 'esri/widgets/Legend'], (Home, Legend) => {
+        require([
+          'esri/widgets/Home',
+          'esri/widgets/Legend'
+        ], (Home, Legend) => {
 
           //
           // CONFIGURE VIEW SPECIFIC STUFF HERE //
@@ -109,7 +112,8 @@ class Application extends AppBase {
         treeTypeLayer.load().then(() => {
 
           treeTypeLayer.set({
-            popupEnabled: false, outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health']
+            popupEnabled: false,
+            outFields: ['ObjectId', 'tree_dbh', 'spc_common', 'address', 'borough', 'nta_name', 'health']
           });
 
           // LOCATION FILTERS //
@@ -173,7 +177,11 @@ class Application extends AppBase {
       // TOP 1O QUERY //
       const top10Query = treesLayer.createQuery();
       top10Query.set({
-        where: '(spc_common is not null)', groupByFieldsForStatistics: ['spc_common', 'spc_latin'], outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}], orderByFields: ['SpeciesCount desc'], num: 10
+        where: '(spc_common is not null)',
+        groupByFieldsForStatistics: ['spc_common', 'spc_latin'],
+        outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}],
+        orderByFields: ['SpeciesCount desc'],
+        num: 10
       });
       treesLayer.queryFeatures(top10Query).then((top10FS) => {
         const treeTypeItemNodes = top10FS.features.map(feature => {
@@ -208,7 +216,11 @@ class Application extends AppBase {
    */
   initializeTreeHistogram({view, treeTypeLayer}) {
     return new Promise((resolve, reject) => {
-      require(["esri/core/promiseUtils", "esri/smartMapping/statistics/histogram", "esri/widgets/HistogramRangeSlider"], (promiseUtils, histogram, HistogramRangeSlider) => {
+      require([
+        "esri/core/promiseUtils",
+        "esri/smartMapping/statistics/histogram",
+        "esri/widgets/HistogramRangeSlider"
+      ], (promiseUtils, histogram, HistogramRangeSlider) => {
 
         // TREE TYPE LIST //
         const treeTypeList = document.getElementById('tree-type-list');
@@ -225,7 +237,15 @@ class Application extends AppBase {
           const diameterMax = 50;
 
           const histogramSlider = new HistogramRangeSlider({
-            container: "histogram-container", rangeType: "between", includedBarColor: '#7bb07f', excludedBarColor: '#e6f0e6', precision: 0, min: diameterMin, max: diameterMax, values: [diameterMin, diameterMax], labelFormatFunction: (value, type) => {
+            container: "histogram-container",
+            rangeType: "between",
+            includedBarColor: '#7bb07f',
+            excludedBarColor: '#e6f0e6',
+            precision: 0,
+            min: diameterMin,
+            max: diameterMax,
+            values: [diameterMin, diameterMax],
+            labelFormatFunction: (value, type) => {
               return value.toFixed(0);
             }, barCreatedFunction: (index, element) => {
               element.setAttribute("stroke-width", "0.8");
@@ -240,15 +260,18 @@ class Application extends AppBase {
             treeSpeciesFilter && filters.push(treeSpeciesFilter);
 
             treeTypeLayerView.featureEffect = {
-              filter: {
-                where: filters.join(' AND ')
-              }, excludedEffect: 'opacity(0.3) blur(5px)'
+              filter: {where: filters.join(' AND ')},
+              excludedEffect: 'opacity(0.3) blur(5px)'
             };
           });
 
           // DEFAULT HISTOGRAM PARAMETERS //
           const defaultHistogramParams = {
-            layer: treeTypeLayer, field: statField, numBins: diameterMax, minValue: diameterMin, maxValue: diameterMax
+            layer: treeTypeLayer,
+            field: statField,
+            numBins: diameterMax,
+            minValue: diameterMin,
+            maxValue: diameterMax
           };
 
           // TREE SPECIES FILTER //
@@ -398,7 +421,11 @@ class Application extends AppBase {
 
       const locationGraphic = new Graphic({
         symbol: {
-          type: 'simple-marker', style: "cross", color: highlightColor2, size: "15pt", outline: {
+          type: 'simple-marker',
+          style: "cross",
+          color: highlightColor2,
+          size: "15pt",
+          outline: {
             color: highlightColor1, width: 3
           }
         }
@@ -406,7 +433,10 @@ class Application extends AppBase {
 
       const searchGraphic = new Graphic({
         symbol: {
-          type: 'simple-fill', color: 'transparent', style: "diagonal-cross", outline: {
+          type: 'simple-fill',
+          color: 'transparent',
+          style: "diagonal-cross",
+          outline: {
             color: "orange", width: 2.2
           }
         }
@@ -414,7 +444,15 @@ class Application extends AppBase {
 
       const getTextSymbol = (label, relativePosition) => {
         return {
-          type: "text", color: highlightColor2, haloColor: highlightColor1, haloSize: "1px", text: label, xoffset: (relativePosition ? 15 : -15), verticalAlignment: 'middle', horizontalAlignment: (relativePosition ? 'left' : 'right'), font: {
+          type: "text",
+          color: highlightColor2,
+          haloColor: highlightColor1,
+          haloSize: "1px",
+          text: label,
+          xoffset: (relativePosition ? 15 : -15),
+          verticalAlignment: 'middle',
+          horizontalAlignment: (relativePosition ? 'left' : 'right'),
+          font: {
             size: 13, family: "Avenir Next LT Pro"
           }
         };
@@ -424,7 +462,11 @@ class Application extends AppBase {
 
       const biggestGraphic = new Graphic({
         symbol: {
-          type: 'simple-marker', style: "circle", color: highlightColor2, size: "9pt", outline: {
+          type: 'simple-marker',
+          style: "circle",
+          color: highlightColor2,
+          size: "9pt",
+          outline: {
             color: highlightColor1, width: 1.8
           }
         }
@@ -432,7 +474,9 @@ class Application extends AppBase {
 
       // ANALYSIS LAYER //
       const analysisGraphicsLayer = new GraphicsLayer({
-        title: 'Filter by Location', effect: 'drop-shadow(1px,1px,1px)', graphics: [searchGraphic, locationGraphic, biggestGraphic, biggestLabelGraphic]
+        title: 'Filter by Location',
+        effect: 'drop-shadow(1px,1px,1px)',
+        graphics: [searchGraphic, locationGraphic, biggestGraphic, biggestLabelGraphic]
       });
       view.map.add(analysisGraphicsLayer);
 
@@ -474,7 +518,12 @@ class Application extends AppBase {
           if (searchGraphic.geometry) {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry, where: '(1=1)', outFields: ['tree_dbh', 'spc_common', 'address', 'borough'], orderByFields: ['tree_dbh desc'], returnGeometry: true, num: 1
+              geometry: searchGraphic.geometry,
+              where: '(1=1)',
+              outFields: ['tree_dbh', 'spc_common', 'address', 'borough'],
+              orderByFields: ['tree_dbh desc'],
+              returnGeometry: true,
+              num: 1
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const biggestTree = summaryFS.features[0];
@@ -492,7 +541,8 @@ class Application extends AppBase {
               const relativePosition = (biggestTree.geometry.longitude > locationGraphic.geometry.longitude);
 
               biggestLabelGraphic.set({
-                geometry: biggestTree.geometry, symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
+                geometry: biggestTree.geometry,
+                symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
               });
 
             });
@@ -511,7 +561,13 @@ class Application extends AppBase {
           if (searchGraphic.geometry) {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry, where: '(spc_common is not null)', outFields: ['spc_common'], groupByFieldsForStatistics: ['spc_common'], orderByFields: ['SpeciesCount desc'], outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}], num: 1
+              geometry: searchGraphic.geometry,
+              where: '(spc_common is not null)',
+              outFields: ['spc_common'],
+              groupByFieldsForStatistics: ['spc_common'],
+              orderByFields: ['SpeciesCount desc'],
+              outStatistics: [{"statisticType": "count", "onStatisticField": "spc_common", "outStatisticFieldName": "SpeciesCount"}],
+              num: 1
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const mostCommonTree = summaryFS.features[0].attributes;
@@ -534,7 +590,9 @@ class Application extends AppBase {
 
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry, where: '(1=1)', outStatistics: [{"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "AvgTreeSize"}]
+              geometry: searchGraphic.geometry,
+              where: '(1=1)',
+              outStatistics: [{"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "AvgTreeSize"}]
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const stats = summaryFS.features[0].attributes;
@@ -553,7 +611,12 @@ class Application extends AppBase {
 
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
-              geometry: searchGraphic.geometry, where: '(1=1)', outFields: ['health'], groupByFieldsForStatistics: ['health'], orderByFields: ['HealthCount desc'], outStatistics: [{"statisticType": "count", "onStatisticField": "health", "outStatisticFieldName": "HealthCount"}]
+              geometry: searchGraphic.geometry,
+              where: '(1=1)',
+              outFields: ['health'],
+              groupByFieldsForStatistics: ['health'],
+              orderByFields: ['HealthCount desc'],
+              outStatistics: [{"statisticType": "count", "onStatisticField": "health", "outStatisticFieldName": "HealthCount"}]
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const healthInfo = summaryFS.features.map((infos, feature) => {
