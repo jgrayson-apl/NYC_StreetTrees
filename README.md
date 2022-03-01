@@ -1,6 +1,6 @@
 # Street Trees of New York City
 
-This application displays the 2015 Street Tree Census for NYC and allows for filtering by tree species and diameter.  Additionally, we calculate summary information about the biggest tree, most common type, and average size for a user defined area of interest defined either interactively or by street address.
+This application displays the 2015 Street Tree Census for NYC and allows for filtering by tree species and diameter.  Additionally, we calculate summary information about the biggest tree, most common type, and average size for an area of interest defined either interactively or by street address.
 
 > Data provided by Department of Parks and Recreation (DRP).
 
