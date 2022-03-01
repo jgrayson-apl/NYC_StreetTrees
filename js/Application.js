@@ -447,13 +447,15 @@ class Application extends AppBase {
           type: "text",
           color: highlightColor2,
           haloColor: highlightColor1,
-          haloSize: "1px",
+          haloSize: "2px",
           text: label,
           xoffset: (relativePosition ? 15 : -15),
           verticalAlignment: 'middle',
           horizontalAlignment: (relativePosition ? 'left' : 'right'),
           font: {
-            size: 13, family: "Avenir Next LT Pro"
+            size: 15,
+            family: "Avenir Next LT Pro",
+            weight: 'bold'
           }
         };
       };
