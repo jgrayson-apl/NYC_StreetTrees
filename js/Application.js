@@ -105,6 +105,11 @@ class Application extends AppBase {
    */
   applicationReady({portal, group, map, view}) {
     return new Promise(async (resolve, reject) => {
+
+      // UNSET CALCITE-TAB HEIGHT //
+      const locationTab = document.getElementById('location-tab');
+      this.setShadowElementStyle(locationTab, 'section', 'height', 'unset');
+
       // VIEW READY //
       this.configView(view).then(() => {
 
@@ -712,6 +717,8 @@ class Application extends AppBase {
           // EVENT HANDLES //
           eventHandles.add([clickHandler, moveHandle, dragHandle]);
         };
+
+
 
       });
     });

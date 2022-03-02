@@ -137,14 +137,6 @@ calcite-tabs {
   min-height: 120px !important;
 }
 
-.esri-search {
-  position: absolute;
-  top: 135px;
-  left: 10px;
-  right: 30px;
-  width: auto !important;
-}
-
 calcite-panel > div[slot="header-actions-end"] {
   display: inline-flex;
   flex-wrap: nowrap;
@@ -157,8 +149,14 @@ calcite-panel > div[slot="header-actions-end"] > calcite-button:not(:last-of-typ
   margin-right: 10px;
 }
 
+#address-tab {
+  position: absolute;
+}
 
-
+.esri-search {
+  margin-right: 30px;
+  width: auto;
+}
 
 
 
