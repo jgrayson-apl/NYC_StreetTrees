@@ -252,7 +252,8 @@ class Application extends AppBase {
             values: [diameterMin, diameterMax],
             labelFormatFunction: (value, type) => {
               return value.toFixed(0);
-            }, barCreatedFunction: (index, element) => {
+            },
+            barCreatedFunction: (index, element) => {
               element.setAttribute("stroke-width", "0.8");
               element.setAttribute("stroke", "#f8f8f8");
             }
@@ -262,12 +263,14 @@ class Application extends AppBase {
           const updateFeatureEffect = promiseUtils.debounce(() => {
 
             const filters = [histogramSlider.generateWhereClause(statField)];
-            treeSpeciesFilter && filters.push(treeSpeciesFilter);
+            this.treeSpeciesFilter && filters.push(this.treeSpeciesFilter);
 
             treeTypeLayerView.featureEffect = {
               filter: {where: filters.join(' AND ')},
               excludedEffect: 'opacity(0.3) blur(5px)'
             };
+
+            this._evented.emit('filter-by-type-change', {});
           });
 
           // DEFAULT HISTOGRAM PARAMETERS //
@@ -280,14 +283,14 @@ class Application extends AppBase {
           };
 
           // TREE SPECIES FILTER //
-          let treeSpeciesFilter = null;
+          this.treeSpeciesFilter = null;
 
           // UPDATE HISTOGRAM BINS //
           this.updateSliderBins = (treeSpecies) => {
-            treeSpeciesFilter = treeSpecies ? `(spc_common = '${ treeSpecies }')` : null;
+            this.treeSpeciesFilter = treeSpecies ? `(spc_common = '${ treeSpecies }')` : null;
 
-            const params = treeSpeciesFilter ? {
-              ...defaultHistogramParams, sqlWhere: treeSpeciesFilter
+            const params = this.treeSpeciesFilter ? {
+              ...defaultHistogramParams, sqlWhere: this.treeSpeciesFilter
             } : defaultHistogramParams;
 
             histogram(params).then((histogramResponse) => {
@@ -419,7 +422,13 @@ class Application extends AppBase {
    * @param treeTypeLayer
    */
   initializeLocationSummary({view, treeTypeLayer}) {
-    require(["esri/core/Handles", "esri/core/promiseUtils", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/geometry/geometryEngine"], (Handles, promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
+    require([
+      "esri/core/Handles",
+      "esri/core/promiseUtils",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      "esri/geometry/geometryEngine"
+    ], (Handles, promiseUtils, Graphic, GraphicsLayer, geometryEngine) => {
 
       const highlightColor1 = '#ffa200';
       const highlightColor2 = '#ffffff';
@@ -523,34 +532,46 @@ class Application extends AppBase {
         // BIGGEST TREE //
         const getBiggestTree = promiseUtils.debounce(() => {
           if (searchGraphic.geometry) {
+
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
               geometry: searchGraphic.geometry,
-              where: '(1=1)',
+              where: this.treeSpeciesFilter || '(1=1)',
               outFields: ['tree_dbh', 'spc_common', 'address', 'borough'],
               orderByFields: ['tree_dbh desc'],
               returnGeometry: true,
               num: 1
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
-              const biggestTree = summaryFS.features[0];
-              const biggestTreeAtts = biggestTree.attributes;
 
-              const treeSpecies = biggestTreeAtts.spc_common.toUpperCase();
-              const treeDiameter = biggestTreeAtts.tree_dbh.toLocaleString();
+              if (summaryFS.features.length) {
 
-              summaryBiggestTypeLabel.innerHTML = treeSpecies;
-              summaryBiggestAddressLabel.innerHTML = `${ biggestTreeAtts.address }, ${ biggestTreeAtts.borough }`;
-              summaryBiggestSizeLabel.innerHTML = treeDiameter;
+                const biggestTree = summaryFS.features[0];
+                const biggestTreeAtts = biggestTree.attributes;
 
-              biggestGraphic.geometry = biggestTree.geometry;
+                const treeSpecies = biggestTreeAtts.spc_common.toUpperCase();
+                const treeDiameter = biggestTreeAtts.tree_dbh.toLocaleString();
 
-              const relativePosition = (biggestTree.geometry.longitude > locationGraphic.geometry.longitude);
+                summaryBiggestTypeLabel.innerHTML = treeSpecies;
+                summaryBiggestAddressLabel.innerHTML = `${ biggestTreeAtts.address }, ${ biggestTreeAtts.borough }`;
+                summaryBiggestSizeLabel.innerHTML = treeDiameter;
 
-              biggestLabelGraphic.set({
-                geometry: biggestTree.geometry,
-                symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
-              });
+                biggestGraphic.geometry = biggestTree.geometry;
+
+                const relativePosition = (biggestTree.geometry.longitude > locationGraphic.geometry.longitude);
+
+                biggestLabelGraphic.set({
+                  geometry: biggestTree.geometry,
+                  symbol: getTextSymbol(`${ treeDiameter } inch ${ treeSpecies }\nlocated at ${ biggestTreeAtts.address }`, relativePosition)
+                });
+
+              } else {
+                summaryBiggestTypeLabel.innerHTML = '';
+                summaryBiggestAddressLabel.innerHTML = '';
+                summaryBiggestSizeLabel.innerHTML = '';
+                biggestGraphic.geometry = null;
+                biggestLabelGraphic.geometry = null;
+              }
 
             });
           } else {
@@ -569,7 +590,7 @@ class Application extends AppBase {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
               geometry: searchGraphic.geometry,
-              where: '(spc_common is not null)',
+              where: this.treeSpeciesFilter || '(spc_common is not null)',
               outFields: ['spc_common'],
               groupByFieldsForStatistics: ['spc_common'],
               orderByFields: ['SpeciesCount desc'],
@@ -577,9 +598,14 @@ class Application extends AppBase {
               num: 1
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
-              const mostCommonTree = summaryFS.features[0].attributes;
-              summaryCommonTypeLabel.innerHTML = mostCommonTree.spc_common.toUpperCase();
-              summaryCommonCountLabel.innerHTML = mostCommonTree.SpeciesCount.toLocaleString();
+              if (summaryFS.features.length) {
+                const mostCommonTree = summaryFS.features[0].attributes;
+                summaryCommonTypeLabel.innerHTML = mostCommonTree.spc_common.toUpperCase();
+                summaryCommonCountLabel.innerHTML = mostCommonTree.SpeciesCount.toLocaleString();
+              } else {
+                summaryCommonTypeLabel.innerHTML = '';
+                summaryCommonCountLabel.innerHTML = '';
+              }
             });
           } else {
             summaryCommonTypeLabel.innerHTML = '';
@@ -598,12 +624,12 @@ class Application extends AppBase {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
               geometry: searchGraphic.geometry,
-              where: '(1=1)',
+              where: this.treeSpeciesFilter || '(1=1)',
               outStatistics: [{"statisticType": "avg", "onStatisticField": "tree_dbh", "outStatisticFieldName": "AvgTreeSize"}]
             });
             return treeTypeLayerView.queryFeatures(summaryQuery).then(summaryFS => {
               const stats = summaryFS.features[0].attributes;
-              summaryAvgSizeLabel.innerHTML = avgFormatter.format(stats.AvgTreeSize);
+              summaryAvgSizeLabel.innerHTML = (stats.AvgTreeSize != null) ? avgFormatter.format(stats.AvgTreeSize) : '';
             });
 
           } else {
@@ -619,7 +645,7 @@ class Application extends AppBase {
             const summaryQuery = treeTypeLayerView.createQuery();
             summaryQuery.set({
               geometry: searchGraphic.geometry,
-              where: '(1=1)',
+              where: this.treeSpeciesFilter || '(1=1)',
               outFields: ['health'],
               groupByFieldsForStatistics: ['health'],
               orderByFields: ['HealthCount desc'],
@@ -650,6 +676,10 @@ class Application extends AppBase {
             getAverageTreeSize()
             //getTreeHealth()
           ]).catch(_abortHandler);
+        });
+
+        this._evented.on('filter-by-type-change', ({}) => {
+          updateSummaryDetails().catch(_abortHandler);
         });
 
         // SEARCH DISTANCE SLIDER //
@@ -717,8 +747,6 @@ class Application extends AppBase {
           // EVENT HANDLES //
           eventHandles.add([clickHandler, moveHandle, dragHandle]);
         };
-
-
 
       });
     });
