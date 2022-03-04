@@ -323,7 +323,7 @@ class Application extends AppBase {
 
             const isNotAtEnd = (animationDirection === DIRECTION.FORWARD)
               ? ((animationIndex + animationWindow) < diameterMax)
-              : ((animationIndex - animationWindow) > diameterMin);
+              : (animationIndex > diameterMin);
 
             if (isAnimating && isNotAtEnd) {
               animationIndex += (animationStep * animationDirection);
