@@ -113,6 +113,7 @@ class Application extends AppBase {
       // VIEW READY //
       this.configView(view).then(() => {
 
+        // TREES LAYER //
         const treeTypeLayer = view.map.layers.find(l => l.title === "Street Trees in NYC");
         treeTypeLayer.load().then(() => {
 
