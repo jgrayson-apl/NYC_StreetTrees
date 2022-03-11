@@ -730,7 +730,7 @@ class Application extends AppBase {
           // VIEW POINTER MOVE //
           const moveHandle = view.on('pointer-move', moveEvt => {
             view.hitTest(moveEvt, {include: [locationGraphic]}).then(({results}) => {
-              view.container.style.cursor = (results?.length) ? 'move' : 'default';
+              view.container.style.cursor = (results?.length) ? 'move' : 'crosshair';
             });
           });
 
